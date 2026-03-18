@@ -11,7 +11,8 @@ from climate_tools.config import make_client
 client = make_client()
 
 # Fetch GeoJSON for level 3 org units
-geojson = client.get("/api/organisationUnits.geojson", params={"level": 3})
+# geojson = client.get("/api/organisationUnits.geojson", params={"level": 4})
+geojson = client.get_org_units_geojson_by_level(3)
 
 # Load into GeoDataFrame
 gdf = gpd.read_file(io.StringIO(json.dumps(geojson)))

@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Convert NetCDF variables/time steps to PNG heatmaps."""
+
+import argparse
+import sys
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import xarray as xr
+
+# Dimensions/variables that are not plottable 2D fields
+SKIP_VARS = {"spatial_ref", "crs", "number", "expver"}
+KNOWN_TIME_DIMS = {"time", "valid_time"}
+KNOWN_SPATIAL_DIMS = {"latitude", "longitude", "lat", "lon", "x", "y"}
+
+
+def find_time_dim(ds: xr.Dataset) -> str | None:
+    for dim in ds.dims:
+        if dim in KNOWN_TIME_DIMS:
+            return str(dim)
+    return None
+
+
+def find_spatial_dims(da: xr.DataArray) -> tuple[str, str] | None:
+    """Return (y_dim, x_dim) if found."""
+    dims = set(da.dims)
+    y_candidates = ["latitude", "lat", "y"]
+    x_candidates = ["longitude", "lon", "x"]
+    y_dim = next((d for d in y_candidates if d in dims), None)
+    x_dim = next((d for d in x_candidates if d in dims), None)
+    if y_dim and x_dim:
+        return (y_dim, x_dim)
+    return None
+
+
+def format_time(t: np.datetime64) -> str:
+    s = str(np.datetime_as_string(t, unit="h"))
+    # Drop T00 for midnight timestamps (daily/yearly data)
+    if s.endswith("T00"):
+        return s[:-3]
+    return s.replace(":", "")
+
+
+def plot_slice(da: xr.DataArray, output_path: Path, title: str) -> None:
+    fig, ax = plt.subplots(figsize=(8, 6))
+    spatial = find_spatial_dims(da)
+    if spatial:
+        y_dim, x_dim = spatial
+        da.plot(x=x_dim, y=y_dim, ax=ax, add_colorbar=True)
+    else:
+        da.plot(ax=ax, add_colorbar=True)
+    ax.set_title(title)
+    fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"  {output_path}")
+
+
+def process_file(nc_path: Path, output_dir: Path, variable: str | None, max_steps: int) -> None:
+    ds = xr.open_dataset(nc_path)
+    time_dim = find_time_dim(ds)
+
+    var_names = [variable] if variable else [v for v in ds.data_vars if v not in SKIP_VARS]
+
+    for var_name in var_names:
+        if var_name not in ds:
+            print(f"Warning: variable '{var_name}' not found in {nc_path.name}, skipping")
+            continue
+
+        da = ds[var_name]
+
+        # Skip scalar / 1D variables
+        if da.ndim < 2:
+            continue
+
+        if not find_spatial_dims(da):
+            continue
+
+        print(f"Variable: {var_name}")
+
+        if time_dim and time_dim in da.dims:
+            times = da[time_dim].values
+            n = min(len(times), max_steps)
+            if len(times) > max_steps:
+                print(f"  ({len(times)} time steps, plotting first {max_steps}; use --max-steps to change)")
+            for i in range(n):
+                t = times[i]
+                time_str = format_time(t)
+                out = output_dir / f"{var_name}_{time_str}.png"
+                title = f"{var_name} — {time_str}"
+                if "units" in da.attrs:
+                    title += f" [{da.attrs['units']}]"
+                plot_slice(da.isel({time_dim: i}), out, title)
+        else:
+            out = output_dir / f"{var_name}.png"
+            title = str(var_name)
+            if "units" in da.attrs:
+                title += f" [{da.attrs['units']}]"
+            plot_slice(da, out, title)
+
+    ds.close()
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Render NetCDF variables as PNG heatmaps.")
+    parser.add_argument("ncfile", type=Path, help="Path to NetCDF file")
+    parser.add_argument("--output-dir", type=Path, default=None, help="Output directory (default: same as input file)")
+    parser.add_argument("--variable", type=str, default=None, help="Plot only this variable")
+    parser.add_argument("--max-steps", type=int, default=10, help="Max time steps to plot (default: 10)")
+    args = parser.parse_args()
+
+    if not args.ncfile.exists():
+        print(f"Error: {args.ncfile} not found", file=sys.stderr)
+        sys.exit(1)
+
+    output_dir: Path = args.output_dir or args.ncfile.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"Reading {args.ncfile}")
+    process_file(args.ncfile, output_dir, args.variable, args.max_steps)
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()
