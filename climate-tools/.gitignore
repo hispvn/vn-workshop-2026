@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing / linting
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.pyright/
+htmlcov/
+.coverage
+coverage.xml
+
+# Docs
+site/
+
+# Data files
+data/
+*.nc
+*.tif
+*.tiff
+
+# OS
+.DS_Store
+Thumbs.db
+.playwright-mcp/
