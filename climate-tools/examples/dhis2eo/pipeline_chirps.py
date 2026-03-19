@@ -45,7 +45,7 @@ from dhis2eo.data.chc.chirps3 import daily
 from dhis2eo.integrations.pandas import dataframe_to_dhis2_json
 from earthkit import transforms
 
-from climate_tools.config import make_client
+from climate_tools.config import make_client, post_data_value_set_batched
 from climate_tools.schemas import DataElement, DataSet, DataSetElement, IdRef, MetadataPayload, PeriodType
 
 # ---------------------------------------------------------------------------
@@ -226,7 +226,7 @@ else:
     )
     print(f"  Sending {len(payload['dataValues'])} data value(s)...")
 
-    result = client.post_data_value_set(payload)
+    result = post_data_value_set_batched(client, payload)
     imported = result.get("response", {}).get("importCount", {})
     print(f"  Imported: {imported.get('imported', 0)}, Updated: {imported.get('updated', 0)}")
 

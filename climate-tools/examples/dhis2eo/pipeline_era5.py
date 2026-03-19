@@ -58,7 +58,7 @@ from dhis2eo.data.cds.era5_land import hourly
 from dhis2eo.integrations.pandas import dataframe_to_dhis2_json
 from earthkit import transforms
 
-from climate_tools.config import make_client
+from climate_tools.config import make_client, post_data_value_set_batched
 from climate_tools.schemas import DataElement, DataSet, DataSetElement, IdRef, MetadataPayload, PeriodType
 
 # The dhis2eo library adds its own StreamHandler to its loggers (force_logging),
@@ -882,7 +882,7 @@ else:
             value_col="value",
         )
         print(f"  Sending {len(payload['dataValues'])} value(s) for {de_name}...")
-        result = client.post_data_value_set(payload)
+        result = post_data_value_set_batched(client, payload)
         imported = result.get("response", {}).get("importCount", {})
         print(f"  Imported: {imported.get('imported', 0)}, Updated: {imported.get('updated', 0)}")
 

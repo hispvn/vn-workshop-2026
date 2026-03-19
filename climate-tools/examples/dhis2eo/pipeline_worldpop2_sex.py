@@ -40,7 +40,7 @@ import xarray as xr
 from dhis2eo.data.worldpop.pop_total import yearly
 from earthkit import transforms
 
-from climate_tools.config import make_client
+from climate_tools.config import make_client, post_data_value_set_batched
 from climate_tools.schemas import (
     Category,
     CategoryCombo,
@@ -313,7 +313,7 @@ else:
     payload = {"dataValues": all_data_values}
     print(f"  Sending {len(all_data_values)} data value(s)...")
 
-    result = client.post_data_value_set(payload)
+    result = post_data_value_set_batched(client, payload)
     imported = result.get("response", {}).get("importCount", {})
     print(f"  Imported: {imported.get('imported', 0)}, Updated: {imported.get('updated', 0)}")
 
