@@ -201,7 +201,7 @@ files = daily.download(
 ```python
 import xarray as xr
 
-data = xr.open_mfdataset(files, join="exact", compat="override")
+data = xr.open_mfdataset(files, combine="nested", concat_dim="time")
 print(f"Variables: {list(data.data_vars)}")
 print(f"Dimensions: {dict(data.sizes)}")
 print(data)
@@ -223,7 +223,7 @@ ERA5-Land downloads go through the CDS API, which queues requests server-side. T
     ```
 
 !!! note "All variables are downloaded by default"
-    The CDS API makes one request per month regardless of how many variables you ask for, and the cached filename (`{prefix}_{year}-{month}.nc`) does not encode which variables are inside. If you first download one variable and later request more, the cached single-variable file would be silently reused and the extra variables would be missing. Since the size difference is negligible (~1 MB for all 7 variables vs ~125 KB for one, per month per bounding box), both scripts default to downloading all variables. You can still pass `--variables` to request a subset.
+    The CDS API makes one request per month regardless of how many variables you ask for, and the cached filename (`{source}_{country_code}_{year}-{month}.nc`, e.g. `era5_sle_2025-01.nc`) does not encode which variables are inside. If you first download one variable and later request more, the cached single-variable file would be silently reused and the extra variables would be missing. Since the size difference is negligible (~1 MB for all 7 variables vs ~125 KB for one, per month per bounding box), both scripts default to downloading all variables. You can still pass `--variables` to request a subset.
 
 ```python
 from dhis2eo.data.cds.era5_land import hourly
@@ -258,6 +258,9 @@ files = hourly.download(
 | `surface_solar_radiation_downwards` | Incoming solar radiation | J/m^2 |
 | `total_evaporation` | Total evaporation | m |
 
+!!! note "All 50 ERA5-Land variables are supported"
+    The table above lists the most commonly used variables. The pipeline supports all 50 ERA5-Land variables, organized into categories: temperature (9), wind (2), pressure (1), precipitation & evaporation (7), runoff (3), snow (8), radiation (4), heat fluxes (2), soil moisture (4), vegetation & surface (4), and lake (6). Pass any valid CDS variable name to `--variables` — if a variable has a registered unit conversion and aggregation method, it will be processed automatically; otherwise it is imported with default settings.
+
 !!! warning "CDS API key required"
     You need a Copernicus CDS account and API key. Sign up at [cds.climate.copernicus.eu](https://cds.climate.copernicus.eu/) and add your key to `.env`:
 
@@ -269,7 +272,7 @@ files = hourly.download(
 ### Opening ERA5 data
 
 ```python
-data = xr.open_mfdataset(files, join="exact", compat="override")
+data = xr.open_mfdataset(files, combine="nested", concat_dim="time")
 print(f"Variables: {list(data.data_vars)}")
 print(f"Dimensions: {dict(data.sizes)}")
 print(f"Coordinates: {list(data.coords)}")
@@ -342,7 +345,7 @@ Both CHIRPS and ERA5 downloads are cached locally — if the output file already
 
 - **Re-running is fast** — only new months are downloaded
 - **Cache invalidation is manual** — if you need to re-download, delete the cached files from the output directory
-- **ERA5 cache limitation** — the filename (`{prefix}_{year}-{month}.nc`) doesn't encode which variables are inside. If you first download one variable, the cached file is reused even when you later request more. This is why the scripts default to downloading all variables.
+- **ERA5 cache limitation** — the filename (`{source}_{country_code}_{year}-{month}.nc`, e.g. `era5_sle_2025-01.nc`) doesn't encode which variables are inside. If you first download one variable, the cached file is reused even when you later request more. This is why the scripts default to downloading all variables.
 
 ## Downloading WorldPop data
 
@@ -413,23 +416,23 @@ Available datasets per country per year:
 
 Age groups: 0, 1-4, 5-9, 10-14, ..., 85-89, 90+
 
-The `get_worldpop_agesex.py` script downloads these by monkey-patching the URL function in `dhis2eo`:
+The `get_worldpop2_agesex.py` script downloads these by monkey-patching the URL function in `dhis2eo`:
 
 ```bash
 # All sex/age combinations
-uv run python examples/dhis2eo/get_worldpop_agesex.py --country-code SLE
+uv run python examples/dhis2eo/get_worldpop2_agesex.py --country-code SLE
 
 # Total male only
-uv run python examples/dhis2eo/get_worldpop_agesex.py --country-code SLE --sex M
+uv run python examples/dhis2eo/get_worldpop2_agesex.py --country-code SLE --sex M
 
 # Males aged 25-29
-uv run python examples/dhis2eo/get_worldpop_agesex.py --country-code SLE --sex M --age 25
+uv run python examples/dhis2eo/get_worldpop2_agesex.py --country-code SLE --sex M --age 25
 
 # With zonal stats per org unit
-uv run python examples/dhis2eo/get_worldpop_agesex.py --country-code SLE --org-unit-level 2
+uv run python examples/dhis2eo/get_worldpop2_agesex.py --country-code SLE --org-unit-level 2
 ```
 
-The `pipeline_worldpop_sex.py` script goes further — it creates DHIS2 data elements with a sex category combo (Male/Female disaggregation) and imports population by sex into DHIS2.
+The `pipeline_worldpop2_sex.py` script goes further — it creates DHIS2 data elements with a sex category combo (Male/Female disaggregation) and imports population by sex into DHIS2.
 
 ## Pydantic schemas for DHIS2 metadata
 
@@ -481,6 +484,9 @@ Key models:
 
 Using fixed UIDs makes scripts idempotent — the DHIS2 metadata endpoint's default MERGE strategy creates objects if they don't exist or updates them if they do.
 
+!!! tip "`openFuturePeriods` for forecast data"
+    Set `openFuturePeriods` on a `DataSet` to allow entering data for future periods. For example, the WorldPop pipeline sets `openFuturePeriods=10` because WorldPop provides population projections through 2030. Without this, DHIS2 would reject data values for periods beyond the current date.
+
 ## Working with xarray
 
 All downloaded data is opened with `xarray`, which provides labelled multi-dimensional arrays — like numpy arrays with named dimensions and coordinates.
@@ -491,7 +497,7 @@ All downloaded data is opened with `xarray`, which provides labelled multi-dimen
 import xarray as xr
 
 # Open multiple files as a single dataset
-ds = xr.open_mfdataset(files, join="exact", compat="override")
+ds = xr.open_mfdataset(files, combine="nested", concat_dim="time")
 
 # Dataset = collection of DataArrays (like a dict of labelled arrays)
 print(ds)                    # overview of all variables and dimensions
@@ -524,9 +530,7 @@ ds = ds.drop_vars([v for v in ["number", "expver"] if v in ds])
 
 ### Why `open_mfdataset`?
 
-Each download function returns multiple files (one per month/year). `xr.open_mfdataset()` opens all files and concatenates them along the time dimension into a single dataset. The `join="exact"` and `compat="override"` parameters handle minor coordinate differences between files.
-
-For WorldPop, files from different years may have different grid sizes, so we use `combine="nested"` with explicit `concat_dim="time"`.
+Each download function returns multiple files (one per month/year). `xr.open_mfdataset()` opens all files and concatenates them along the time dimension into a single dataset. The `combine="nested"` and `concat_dim="time"` parameters explicitly control how files are combined, avoiding issues when files have slightly different coordinate values.
 
 ## Polygon-based zonal statistics
 
@@ -632,13 +636,13 @@ Downloads daily rainfall once for all org units, computes daily mean precipitati
 
 ```bash
 # Single district (Bo)
-uv run python examples/dhis2eo/pipeline_chirps.py --org-unit O6uvpzGd5pu
+uv run python examples/dhis2eo/pipeline_chirps.py --org-unit O6uvpzGd5pu --country-code SLE
 
 # All 13 districts in Sierra Leone
-uv run python examples/dhis2eo/pipeline_chirps.py --org-unit-level 2
+uv run python examples/dhis2eo/pipeline_chirps.py --org-unit-level 2 --country-code SLE
 
 # Custom date range
-uv run python examples/dhis2eo/pipeline_chirps.py --org-unit-level 2 --start 2024-06-01 --end 2024-06-30
+uv run python examples/dhis2eo/pipeline_chirps.py --org-unit-level 2 --country-code SLE --start 2024-06-01 --end 2024-06-30
 ```
 
 ### ERA5 pipeline
@@ -647,10 +651,10 @@ Downloads hourly data once for all org units, converts cumulative variables to i
 
 ```bash
 # Default (all 7 variables)
-uv run python examples/dhis2eo/pipeline_era5.py --org-unit O6uvpzGd5pu
+uv run python examples/dhis2eo/pipeline_era5.py --org-unit O6uvpzGd5pu --country-code SLE
 
 # Subset of variables
-uv run python examples/dhis2eo/pipeline_era5.py --org-unit-level 2 \
+uv run python examples/dhis2eo/pipeline_era5.py --org-unit-level 2 --country-code SLE \
     --variables 2m_temperature total_precipitation
 ```
 
@@ -662,10 +666,10 @@ Downloads country-level population rasters, computes total population per org un
 
 ```bash
 # Single district
-uv run python examples/dhis2eo/pipeline_worldpop.py --org-unit O6uvpzGd5pu --country-code SLE
+uv run python examples/dhis2eo/pipeline_worldpop2.py --org-unit O6uvpzGd5pu --country-code SLE
 
 # All districts, multiple years
-uv run python examples/dhis2eo/pipeline_worldpop.py --org-unit-level 2 --country-code SLE \
+uv run python examples/dhis2eo/pipeline_worldpop2.py --org-unit-level 2 --country-code SLE \
     --start 2020 --end 2025
 ```
 
@@ -680,6 +684,21 @@ bash run_all_imports.sh
 ```
 
 This imports ERA5 (7 variables, 3 months), WorldPop (6 years), and CHIRPS (6 months) for all 13 Sierra Leone districts.
+
+### Visualizing NetCDF files
+
+The `nc-to-png` tool converts NetCDF variables and time steps into PNG heatmaps for quick visual inspection:
+
+```bash
+# All variables and time steps (up to 10 by default)
+./tools/nc-to-png data/era5_sle_2025-01.nc
+
+# Specific variable, custom output directory
+./tools/nc-to-png data/chirps_sle_2024-06.nc --variable precip --output-dir plots/
+
+# Limit number of time steps
+./tools/nc-to-png data/era5_sle_2025-01.nc --variable t2m --max-steps 5
+```
 
 ### Querying the results
 

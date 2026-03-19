@@ -81,14 +81,14 @@ uv run python examples/dhis2/04_list_users.py
 uv run python examples/dhis2/02_browse_org_units.py
 
 # Earth Observation — download data
-uv run python examples/dhis2eo/get_chirps.py --org-unit O6uvpzGd5pu
-uv run python examples/dhis2eo/get_era5.py --org-unit O6uvpzGd5pu
+uv run python examples/dhis2eo/get_chirps.py --org-unit O6uvpzGd5pu --country-code SLE
+uv run python examples/dhis2eo/get_era5.py --org-unit O6uvpzGd5pu --country-code SLE
 uv run python examples/dhis2eo/get_worldpop2.py O6uvpzGd5pu --country-code SLE
 
 # Earth Observation — full pipelines (create metadata + download + push to DHIS2)
-uv run python examples/dhis2eo/pipeline_chirps.py --org-unit O6uvpzGd5pu
-uv run python examples/dhis2eo/pipeline_era5.py --org-unit O6uvpzGd5pu
-uv run python examples/dhis2eo/pipeline_worldpop.py --org-unit O6uvpzGd5pu --country-code SLE
+uv run python examples/dhis2eo/pipeline_chirps.py --org-unit O6uvpzGd5pu --country-code SLE
+uv run python examples/dhis2eo/pipeline_era5.py --org-unit O6uvpzGd5pu --country-code SLE
+uv run python examples/dhis2eo/pipeline_worldpop2.py --org-unit O6uvpzGd5pu --country-code SLE
 
 # Run all pipelines for all 13 districts at once
 bash run_all_imports.sh
