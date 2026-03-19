@@ -45,24 +45,73 @@ from climate_tools.config import make_client
 logging.getLogger("ecmwf.datastores").setLevel(logging.DEBUG)
 
 ALL_VARIABLES = [
-    "total_precipitation",
+    # Temperature
     "2m_temperature",
     "2m_dewpoint_temperature",
+    "skin_temperature",
+    "soil_temperature_level_1",
+    "soil_temperature_level_2",
+    "soil_temperature_level_3",
+    "soil_temperature_level_4",
+    "temperature_of_snow_layer",
+    # Wind
     "10m_u_component_of_wind",
     "10m_v_component_of_wind",
-    "surface_solar_radiation_downwards",
+    # Pressure
+    "surface_pressure",
+    # Precipitation & evaporation
+    "total_precipitation",
     "total_evaporation",
+    "potential_evaporation",
+    "evaporation_from_bare_soil",
+    "evaporation_from_open_water_surfaces_excluding_oceans",
+    "evaporation_from_the_top_of_canopy",
+    "evaporation_from_vegetation_transpiration",
+    # Runoff
+    "runoff",
+    "surface_runoff",
+    "sub_surface_runoff",
+    # Snow
+    "snowfall",
+    "snowmelt",
+    "snow_evaporation",
+    "snow_depth",
+    "snow_depth_water_equivalent",
+    "snow_cover",
+    "snow_albedo",
+    "snow_density",
+    # Radiation
+    "surface_solar_radiation_downwards",
+    "surface_thermal_radiation_downwards",
+    "surface_net_solar_radiation",
+    "surface_net_thermal_radiation",
+    # Heat fluxes
+    "surface_latent_heat_flux",
+    "surface_sensible_heat_flux",
+    # Soil moisture
+    "volumetric_soil_water_layer_1",
+    "volumetric_soil_water_layer_2",
+    "volumetric_soil_water_layer_3",
+    "volumetric_soil_water_layer_4",
+    # Vegetation & surface
+    "leaf_area_index_high_vegetation",
+    "leaf_area_index_low_vegetation",
+    "forecast_albedo",
+    "skin_reservoir_content",
+    # Lake
+    "lake_bottom_temperature",
+    "lake_ice_depth",
+    "lake_ice_temperature",
+    "lake_mix_layer_depth",
+    "lake_mix_layer_temperature",
+    "lake_shape_factor",
+    "lake_total_layer_temperature",
 ]
 
 # Variable metadata: NetCDF name, temporal aggregation, cumulative flag, unit conversion, display unit
+# Cumulative variables accumulate over forecast steps and need differencing before aggregation.
 VARIABLE_INFO = {
-    "total_precipitation": {
-        "nc_var": "tp",
-        "agg": "sum",
-        "is_cumulative": True,
-        "convert": lambda v: v * 1000.0,
-        "unit": "mm",
-    },
+    # --- Temperature (instantaneous, K → °C) ---
     "2m_temperature": {
         "nc_var": "t2m",
         "agg": "mean",
@@ -77,6 +126,49 @@ VARIABLE_INFO = {
         "convert": lambda v: v - 273.15,
         "unit": "°C",
     },
+    "skin_temperature": {
+        "nc_var": "skt",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    "soil_temperature_level_1": {
+        "nc_var": "stl1",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    "soil_temperature_level_2": {
+        "nc_var": "stl2",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    "soil_temperature_level_3": {
+        "nc_var": "stl3",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    "soil_temperature_level_4": {
+        "nc_var": "stl4",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    "temperature_of_snow_layer": {
+        "nc_var": "tsn",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    # --- Wind (instantaneous, m/s) ---
     "10m_u_component_of_wind": {
         "nc_var": "u10",
         "agg": "mean",
@@ -91,12 +183,21 @@ VARIABLE_INFO = {
         "convert": lambda v: v,
         "unit": "m/s",
     },
-    "surface_solar_radiation_downwards": {
-        "nc_var": "ssrd",
+    # --- Pressure (instantaneous, Pa → hPa) ---
+    "surface_pressure": {
+        "nc_var": "sp",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v / 100.0,
+        "unit": "hPa",
+    },
+    # --- Precipitation & evaporation (accumulated, m → mm) ---
+    "total_precipitation": {
+        "nc_var": "tp",
         "agg": "sum",
         "is_cumulative": True,
-        "convert": lambda v: v / 1_000_000.0,
-        "unit": "MJ/m²",
+        "convert": lambda v: v * 1000.0,
+        "unit": "mm",
     },
     "total_evaporation": {
         "nc_var": "e",
@@ -104,6 +205,272 @@ VARIABLE_INFO = {
         "is_cumulative": True,
         "convert": lambda v: abs(v) * 1000.0,
         "unit": "mm",
+    },
+    "potential_evaporation": {
+        "nc_var": "pev",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: abs(v) * 1000.0,
+        "unit": "mm",
+    },
+    "evaporation_from_bare_soil": {
+        "nc_var": "evabs",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: abs(v) * 1000.0,
+        "unit": "mm",
+    },
+    "evaporation_from_open_water_surfaces_excluding_oceans": {
+        "nc_var": "evaow",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: abs(v) * 1000.0,
+        "unit": "mm",
+    },
+    "evaporation_from_the_top_of_canopy": {
+        "nc_var": "evatc",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: abs(v) * 1000.0,
+        "unit": "mm",
+    },
+    "evaporation_from_vegetation_transpiration": {
+        "nc_var": "evavt",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: abs(v) * 1000.0,
+        "unit": "mm",
+    },
+    # --- Runoff (accumulated, m → mm) ---
+    "runoff": {
+        "nc_var": "ro",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v * 1000.0,
+        "unit": "mm",
+    },
+    "surface_runoff": {
+        "nc_var": "sro",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v * 1000.0,
+        "unit": "mm",
+    },
+    "sub_surface_runoff": {
+        "nc_var": "ssro",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v * 1000.0,
+        "unit": "mm",
+    },
+    # --- Snow (mixed: accumulated fluxes and instantaneous state) ---
+    "snowfall": {
+        "nc_var": "sf",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v * 1000.0,
+        "unit": "mm",
+    },
+    "snowmelt": {
+        "nc_var": "smlt",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v * 1000.0,
+        "unit": "mm",
+    },
+    "snow_evaporation": {
+        "nc_var": "es",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: abs(v) * 1000.0,
+        "unit": "mm",
+    },
+    "snow_depth": {
+        "nc_var": "sde",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m",
+    },
+    "snow_depth_water_equivalent": {
+        "nc_var": "sd",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v * 1000.0,
+        "unit": "mm",
+    },
+    "snow_cover": {
+        "nc_var": "snowc",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "%",
+    },
+    "snow_albedo": {
+        "nc_var": "asn",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "0-1",
+    },
+    "snow_density": {
+        "nc_var": "rsn",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "kg/m³",
+    },
+    # --- Radiation (accumulated, J/m² → MJ/m²) ---
+    "surface_solar_radiation_downwards": {
+        "nc_var": "ssrd",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v / 1_000_000.0,
+        "unit": "MJ/m²",
+    },
+    "surface_thermal_radiation_downwards": {
+        "nc_var": "strd",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v / 1_000_000.0,
+        "unit": "MJ/m²",
+    },
+    "surface_net_solar_radiation": {
+        "nc_var": "ssr",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v / 1_000_000.0,
+        "unit": "MJ/m²",
+    },
+    "surface_net_thermal_radiation": {
+        "nc_var": "str",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v / 1_000_000.0,
+        "unit": "MJ/m²",
+    },
+    # --- Heat fluxes (accumulated, J/m² → MJ/m²) ---
+    "surface_latent_heat_flux": {
+        "nc_var": "slhf",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v / 1_000_000.0,
+        "unit": "MJ/m²",
+    },
+    "surface_sensible_heat_flux": {
+        "nc_var": "sshf",
+        "agg": "sum",
+        "is_cumulative": True,
+        "convert": lambda v: v / 1_000_000.0,
+        "unit": "MJ/m²",
+    },
+    # --- Soil moisture (instantaneous, m³/m³) ---
+    "volumetric_soil_water_layer_1": {
+        "nc_var": "swvl1",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m³/m³",
+    },
+    "volumetric_soil_water_layer_2": {
+        "nc_var": "swvl2",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m³/m³",
+    },
+    "volumetric_soil_water_layer_3": {
+        "nc_var": "swvl3",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m³/m³",
+    },
+    "volumetric_soil_water_layer_4": {
+        "nc_var": "swvl4",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m³/m³",
+    },
+    # --- Vegetation & surface (instantaneous) ---
+    "leaf_area_index_high_vegetation": {
+        "nc_var": "lai_hv",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m²/m²",
+    },
+    "leaf_area_index_low_vegetation": {
+        "nc_var": "lai_lv",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m²/m²",
+    },
+    "forecast_albedo": {
+        "nc_var": "fal",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "0-1",
+    },
+    "skin_reservoir_content": {
+        "nc_var": "src",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v * 1000.0,
+        "unit": "mm",
+    },
+    # --- Lake (instantaneous) ---
+    "lake_bottom_temperature": {
+        "nc_var": "lblt",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    "lake_ice_depth": {
+        "nc_var": "licd",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m",
+    },
+    "lake_ice_temperature": {
+        "nc_var": "lict",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    "lake_mix_layer_depth": {
+        "nc_var": "lmld",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "m",
+    },
+    "lake_mix_layer_temperature": {
+        "nc_var": "lmlt",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
+    },
+    "lake_shape_factor": {
+        "nc_var": "lshf",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v,
+        "unit": "-",
+    },
+    "lake_total_layer_temperature": {
+        "nc_var": "ltlt",
+        "agg": "mean",
+        "is_cumulative": False,
+        "convert": lambda v: v - 273.15,
+        "unit": "°C",
     },
 }
 
