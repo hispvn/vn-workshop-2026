@@ -173,6 +173,7 @@ metadata = MetadataPayload(
             name="DEMO: Population by Sex",
             shortName="DEMO: Pop by Sex",
             periodType=PeriodType.YEARLY,
+            openFuturePeriods=10,
             dataSetElements=[DataSetElement(dataElement=de_pop_sex)],
             organisationUnits=[IdRef(id=uid) for uid in org_units["id"]],  # pyright: ignore[reportIndexIssue]
         ),

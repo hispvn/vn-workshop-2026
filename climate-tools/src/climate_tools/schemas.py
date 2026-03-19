@@ -142,6 +142,7 @@ class DataSet(BaseModel):
     periodType: PeriodType = PeriodType.MONTHLY
     dataSetElements: list[DataSetElement] = Field(default_factory=list)
     organisationUnits: list[IdRef] = Field(default_factory=list)
+    openFuturePeriods: int = 0
     sharing: Sharing = Field(default_factory=Sharing)
 
 
