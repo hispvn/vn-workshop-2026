@@ -19,13 +19,13 @@ This script:
 
 Usage:
   # Single org unit
-  uv run python examples/dhis2eo/get_era5.py --org-unit O6uvpzGd5pu
+  uv run python examples/dhis2eo/get_era5.py --country-code SLE --org-unit O6uvpzGd5pu
 
   # All org units at level 2 (districts)
-  uv run python examples/dhis2eo/get_era5.py --org-unit-level 2
+  uv run python examples/dhis2eo/get_era5.py --country-code SLE --org-unit-level 2
 
   # Subset of variables
-  uv run python examples/dhis2eo/get_era5.py --org-unit O6uvpzGd5pu --variables 2m_temperature total_precipitation
+  uv run python examples/dhis2eo/get_era5.py --country-code SLE --org-unit O6uvpzGd5pu --variables 2m_temperature total_precipitation
 """
 
 import argparse
@@ -491,9 +491,13 @@ parser.add_argument(
     default=ALL_VARIABLES,
     help='Variables to download, or "all" for all supported variables (default: all)',
 )
+parser.add_argument("--country-code", required=True, help="ISO3 country code (e.g. SLE)")
 parser.add_argument("--dirname", default="era5_data", help="Output directory (default: era5_data)")
-parser.add_argument("--prefix", default="era5", help="File prefix (default: era5)")
+parser.add_argument("--prefix", default=None, help="File prefix (default: era5_{country_code})")
 args = parser.parse_args()
+
+if args.prefix is None:
+    args.prefix = f"era5_{args.country_code.lower()}"
 
 if args.variables == ["all"]:
     args.variables = ALL_VARIABLES

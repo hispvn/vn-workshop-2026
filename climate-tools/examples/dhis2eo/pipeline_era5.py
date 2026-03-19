@@ -38,10 +38,10 @@ The pipeline:
 
 Usage:
   # Single org unit (Bo district), all variables (default)
-  uv run python examples/dhis2eo/pipeline_era5.py --org-unit O6uvpzGd5pu
+  uv run python examples/dhis2eo/pipeline_era5.py --country-code SLE --org-unit O6uvpzGd5pu
 
   # All districts, subset of variables
-  uv run python examples/dhis2eo/pipeline_era5.py --org-unit-level 2 \
+  uv run python examples/dhis2eo/pipeline_era5.py --country-code SLE --org-unit-level 2 \
       --variables total_precipitation 2m_temperature 2m_dewpoint_temperature
 """
 
@@ -667,9 +667,13 @@ parser.add_argument(
     default=list(VARIABLE_REGISTRY.keys()),
     help=f"ERA5 variables to download (default: all). Supported: {', '.join(VARIABLE_REGISTRY.keys())}",
 )
+parser.add_argument("--country-code", required=True, help="ISO3 country code (e.g. SLE)")
 parser.add_argument("--dirname", default="era5_data", help="Download directory (default: era5_data)")
-parser.add_argument("--prefix", default="era5", help="File prefix (default: era5)")
+parser.add_argument("--prefix", default=None, help="File prefix (default: era5_{country_code})")
 args = parser.parse_args()
+
+if args.prefix is None:
+    args.prefix = f"era5_{args.country_code.lower()}"
 
 # Validate requested variables against registry
 for var in args.variables:

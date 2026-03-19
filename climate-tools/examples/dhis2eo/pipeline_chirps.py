@@ -26,13 +26,13 @@ Target org units:
 
 Usage:
   # Single org unit (Bo district)
-  uv run python examples/dhis2eo/pipeline_chirps.py --org-unit O6uvpzGd5pu
+  uv run python examples/dhis2eo/pipeline_chirps.py --country-code SLE --org-unit O6uvpzGd5pu
 
   # All districts (level 2) in Sierra Leone
-  uv run python examples/dhis2eo/pipeline_chirps.py --org-unit-level 2
+  uv run python examples/dhis2eo/pipeline_chirps.py --country-code SLE --org-unit-level 2
 
   # Custom date range
-  uv run python examples/dhis2eo/pipeline_chirps.py --org-unit-level 2 --start 2024-01-01 --end 2024-01-31
+  uv run python examples/dhis2eo/pipeline_chirps.py --country-code SLE --org-unit-level 2 --start 2024-01-01 --end 2024-01-31
 """
 
 import argparse
@@ -65,9 +65,13 @@ group.add_argument("--org-unit", help="Single DHIS2 org unit UID (e.g. O6uvpzGd5
 group.add_argument("--org-unit-level", type=int, help="Process all org units at this level (e.g. 2 for districts)")
 parser.add_argument("--start", default="2024-01-01", help="Start date, YYYY-MM-DD (default: 2024-01-01)")
 parser.add_argument("--end", default="2024-01-31", help="End date, YYYY-MM-DD (default: 2024-01-31)")
+parser.add_argument("--country-code", required=True, help="ISO3 country code (e.g. SLE)")
 parser.add_argument("--dirname", default="chirps_data", help="Download directory (default: chirps_data)")
-parser.add_argument("--prefix", default="chirps", help="File prefix (default: chirps)")
+parser.add_argument("--prefix", default=None, help="File prefix (default: chirps_{country_code})")
 args = parser.parse_args()
+
+if args.prefix is None:
+    args.prefix = f"chirps_{args.country_code.lower()}"
 
 # ---------------------------------------------------------------------------
 # Step 0: Connect to DHIS2

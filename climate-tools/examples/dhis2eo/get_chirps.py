@@ -13,13 +13,13 @@ This script:
 
 Usage:
   # Single org unit
-  uv run python examples/dhis2eo/get_chirps.py --org-unit O6uvpzGd5pu
+  uv run python examples/dhis2eo/get_chirps.py --country-code SLE --org-unit O6uvpzGd5pu
 
   # All org units at level 2 (districts)
-  uv run python examples/dhis2eo/get_chirps.py --org-unit-level 2
+  uv run python examples/dhis2eo/get_chirps.py --country-code SLE --org-unit-level 2
 
   # Custom date range
-  uv run python examples/dhis2eo/get_chirps.py --org-unit O6uvpzGd5pu --start 2023-06 --end 2023-08
+  uv run python examples/dhis2eo/get_chirps.py --country-code SLE --org-unit O6uvpzGd5pu --start 2023-06 --end 2023-08
 """
 
 import argparse
@@ -39,9 +39,13 @@ group.add_argument("--org-unit", help="Single DHIS2 org unit UID (e.g. O6uvpzGd5
 group.add_argument("--org-unit-level", type=int, help="All org units at this level (e.g. 2 for districts)")
 parser.add_argument("--start", default="2024-01", help="Start month (default: 2024-01)")
 parser.add_argument("--end", default="2024-01", help="End month (default: 2024-01)")
+parser.add_argument("--country-code", required=True, help="ISO3 country code (e.g. SLE)")
 parser.add_argument("--dirname", default="chirps_data", help="Output directory (default: chirps_data)")
-parser.add_argument("--prefix", default="chirps", help="File prefix (default: chirps)")
+parser.add_argument("--prefix", default=None, help="File prefix (default: chirps_{country_code})")
 args = parser.parse_args()
+
+if args.prefix is None:
+    args.prefix = f"chirps_{args.country_code.lower()}"
 
 # -- Connect to DHIS2 --
 client = make_client()
