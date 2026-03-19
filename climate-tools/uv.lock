@@ -299,6 +299,7 @@ source = { editable = "." }
 dependencies = [
     { name = "dhis2-client" },
     { name = "dhis2eo" },
+    { name = "earthkit-transforms" },
     { name = "geojson-pydantic" },
     { name = "geopandas" },
     { name = "matplotlib" },
@@ -321,6 +322,7 @@ dev = [
 requires-dist = [
     { name = "dhis2-client", git = "https://github.com/dhis2/dhis2-python-client" },
     { name = "dhis2eo", git = "https://github.com/dhis2/dhis2eo" },
+    { name = "earthkit-transforms", specifier = ">=0.5.3.1" },
     { name = "geojson-pydantic", specifier = ">=2.1.0" },
     { name = "geopandas", specifier = ">=1.1,<2" },
     { name = "matplotlib", specifier = ">=3.9" },
@@ -543,6 +545,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3c/6e/6ac5792a02bc38f1f97273f83d9c4b31dc41db596d97ccae8f3fc22508d9/earthkit_meteo-0.5.1.tar.gz", hash = "sha256:38c80250291bb583fea3a46297cdd405fb307321b9d9a8b2264558424d64d47e", size = 369236, upload-time = "2026-02-18T13:48:02.334Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c0/5c/b2f6d6221834f8df6912b8623bea7070b5cb593d098a606b376badc21678/earthkit_meteo-0.5.1-py3-none-any.whl", hash = "sha256:02ae1ed7471749b3ee18b286a84a7f41e2bf3cdb54f923928f455eb4ecb988ca", size = 57071, upload-time = "2026-02-18T13:48:01.006Z" },
+]
+
+[[package]]
+name = "earthkit-transforms"
+version = "0.5.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "array-api-compat" },
+    { name = "earthkit-data" },
+    { name = "earthkit-utils" },
+    { name = "geopandas" },
+    { name = "numpy" },
+    { name = "xarray" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2b/8f/2b112128b24e3ff2a13d8a0eee42d7e4517d9642a1f2067087ddc931ae44/earthkit_transforms-0.5.3.1.tar.gz", hash = "sha256:d4ea111401af99fb309fe9402f4712d71dc80caa722baa37466c09bc7c116e90", size = 69685, upload-time = "2025-11-20T11:15:41.829Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c5/87/e019223fef300e66b3b69802f3ce4f90c90b1efc6f8a087d15e7f671996a/earthkit_transforms-0.5.3.1-py3-none-any.whl", hash = "sha256:6ca5971a0c4875f32dda08252cab57bd0f4dffc888f05f00316e08a1d91ca39d", size = 39281, upload-time = "2025-11-20T11:15:40.184Z" },
 ]
 
 [[package]]
