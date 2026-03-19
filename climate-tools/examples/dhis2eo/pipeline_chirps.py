@@ -176,7 +176,7 @@ files = daily.download(
 print(f"  Downloaded {len(files)} file(s)")
 
 # Open downloaded NetCDF files as a single xarray Dataset
-ds = xr.open_mfdataset(files, join="exact", compat="override")
+ds = xr.open_mfdataset(files, combine="nested", concat_dim="time")
 
 # Spatial aggregation: polygon-based mean per org unit (daily data, no temporal resampling)
 ds_org_units = transforms.spatial.reduce(

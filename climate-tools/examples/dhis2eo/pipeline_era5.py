@@ -295,7 +295,7 @@ files = hourly.download(
 )
 print(f"  Downloaded {len(files)} file(s)")
 
-ds = xr.open_mfdataset(files, join="exact", compat="override")
+ds = xr.open_mfdataset(files, combine="nested", concat_dim="time")
 
 # Drop auxiliary variables that may be present in ERA5 files
 ds = ds.drop_vars([v for v in ["number", "expver"] if v in ds])

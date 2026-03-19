@@ -75,7 +75,7 @@ files = daily.download(
 )
 
 # -- Open and compute zonal statistics --
-data = xr.open_mfdataset(files, join="exact", compat="override")
+data = xr.open_mfdataset(files, combine="nested", concat_dim="time")
 
 ds_org_units = transforms.spatial.reduce(
     data["precip"],

@@ -164,7 +164,7 @@ files = hourly.download(
 )
 
 # -- Open and compute daily zonal statistics --
-data = xr.open_mfdataset(files, join="exact", compat="override")
+data = xr.open_mfdataset(files, combine="nested", concat_dim="time")
 
 # Drop auxiliary variables that may be present in ERA5 files
 data = data.drop_vars([v for v in ["number", "expver"] if v in data])
