@@ -849,7 +849,7 @@ for var_name, info in active_vars.items():
                 {
                     "orgUnit": str(row["id"]),
                     time_col: str(row[time_col]),
-                    "value": str(row["value"]),
+                    "value": row["value"],
                     "dataElement": str(info["de_id"]),
                 }
             )
