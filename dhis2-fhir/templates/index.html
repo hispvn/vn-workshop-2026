@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}DHIS2-FHIR Resource Renderer{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-slate-900 mb-1">DHIS2-FHIR Resource Renderer</h1>
+<p class="text-slate-500 mb-6">Renders FHIR resources from the IG as interactive HTML pages.</p>
+
+<!-- Dashboard Stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <a href="/patients" class="card p-4 hover:shadow-md transition-shadow no-underline group">
+        <div class="text-3xl font-bold text-blue-600">{{ patients|length }}</div>
+        <div class="text-sm text-slate-500 group-hover:text-blue-600 transition-colors">Patients</div>
+    </a>
+    <a href="/ips" class="card p-4 hover:shadow-md transition-shadow no-underline group">
+        <div class="text-3xl font-bold text-emerald-600">{{ ips_count }}</div>
+        <div class="text-sm text-slate-500 group-hover:text-emerald-600 transition-colors">IPS Bundles</div>
+    </a>
+    <a href="#questionnaires" class="card p-4 hover:shadow-md transition-shadow no-underline group">
+        <div class="text-3xl font-bold text-amber-600">{{ questionnaires|length }}</div>
+        <div class="text-sm text-slate-500 group-hover:text-amber-600 transition-colors">Questionnaires</div>
+    </a>
+    <a href="#responses" class="card p-4 hover:shadow-md transition-shadow no-underline group">
+        <div class="text-3xl font-bold text-purple-600">{{ responses|length }}</div>
+        <div class="text-sm text-slate-500 group-hover:text-purple-600 transition-colors">Responses</div>
+    </a>
+</div>
+
+<!-- Patients -->
+<div class="card card-accent-blue p-6 mb-5">
+    <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-semibold text-slate-800">Patients</h2>
+        <div class="flex gap-2">
+            <a href="/patients" class="btn-primary btn-sm">Search & Browse</a>
+            <a href="/patient/new/create" class="btn-secondary btn-sm">+ New</a>
+        </div>
+    </div>
+    <p class="text-sm text-slate-500 mb-4">DHIS2 Tracked Entities rendered as FHIR Patient resources.</p>
+    {% if patients %}
+    <table class="w-full text-sm zebra-table">
+        <thead>
+            <tr class="border-b border-slate-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Name</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Gender</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Date of Birth</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Identifier</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in patients[:10] %}
+            <tr class="border-b border-slate-100">
+                <td class="py-2.5 px-3"><a href="/patient/{{ p.id }}" class="text-primary-600 font-medium hover:underline">{{ p.display_name }}</a></td>
+                <td class="py-2.5 px-3">
+                    {% if p.gender == 'female' %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-pink-50 text-pink-700">Female</span>
+                    {% elif p.gender == 'male' %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Male</span>
+                    {% else %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">{{ p.gender }}</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 text-slate-600">{{ p.birthDate }}</td>
+                <td class="py-2.5 px-3 whitespace-nowrap">
+                    {% set ids = p.identifier_display() %}
+                    {% if ids %}
+                    <span class="text-[10px] text-slate-400 mr-1">{{ ids[0].type }}</span><code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">{{ ids[0].value }}</code>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3"><a href="/patient/{{ p.id }}" class="btn-secondary btn-sm">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if patients|length > 10 %}
+    <p class="text-center text-sm text-slate-500 pt-3 border-t border-slate-100 mt-2">
+        Showing 10 of {{ patients|length }} patients. <a href="/patients" class="text-primary-600 hover:underline">View all &raquo;</a>
+    </p>
+    {% endif %}
+    {% else %}
+    <div class="bg-amber-50 text-amber-700 px-4 py-3 rounded-md text-sm">No Patients found. Run <code class="bg-amber-100 px-1 rounded">make docker-sushi</code> to compile FSH files.</div>
+    {% endif %}
+</div>
+
+<!-- IPS Bundles -->
+<div class="card card-accent-green p-6 mb-5">
+    <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-semibold text-slate-800">IPS Bundles</h2>
+        <a href="/ips" class="btn-primary btn-sm">View All</a>
+    </div>
+    <p class="text-sm text-slate-500">International Patient Summaries — document Bundles containing Patient demographics and Immunization records.
+    {% if ips_count %}<strong class="text-emerald-700">{{ ips_count }}</strong> IPS documents available.{% endif %}</p>
+</div>
+
+<!-- Questionnaires -->
+<div id="questionnaires" class="card card-accent-amber p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Questionnaires</h2>
+    <p class="text-sm text-slate-500 mb-4">Each Questionnaire represents a DHIS2 program stage data entry form.</p>
+    {% if questionnaires %}
+    <table class="w-full text-sm zebra-table">
+        <thead>
+            <tr class="border-b border-slate-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Title</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">ID</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Items</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Subject</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for q in questionnaires %}
+            <tr class="border-b border-slate-100">
+                <td class="py-2.5 px-3 font-medium">{{ q.display_title }}</td>
+                <td class="py-2.5 px-3"><code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">{{ q.id }}</code></td>
+                <td class="py-2.5 px-3 text-slate-600">{{ q.item|length }} fields</td>
+                <td class="py-2.5 px-3">
+                    {% if q.subjectType %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">{{ q.subjectType|join(', ') }}</span>
+                    {% else %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Anonymous</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 space-x-1">
+                    <a href="/questionnaire/{{ q.id }}" class="btn-primary btn-sm">Render</a>
+                    <a href="/json/Questionnaire/{{ q.id }}" class="btn-secondary btn-sm">JSON</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="bg-amber-50 text-amber-700 px-4 py-3 rounded-md text-sm">No Questionnaires found. Run <code class="bg-amber-100 px-1 rounded">make docker-sushi</code> to compile FSH files.</div>
+    {% endif %}
+</div>
+
+<!-- QuestionnaireResponses -->
+<div id="responses" class="card card-accent-purple p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Submitted Events</h2>
+    <p class="text-sm text-slate-500 mb-4">Each QuestionnaireResponse represents a completed DHIS2 event (form submission).</p>
+    {% if responses %}
+    <table class="w-full text-sm zebra-table">
+        <thead>
+            <tr class="border-b border-slate-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">ID</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Questionnaire</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Subject</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Date</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Status</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in responses %}
+            <tr class="border-b border-slate-100">
+                <td class="py-2.5 px-3"><code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded whitespace-nowrap">{{ r.id | replace('QuestionnaireResponse', 'QR') }}</code></td>
+                <td class="py-2.5 px-3">{{ r.questionnaire.split('/')|last | replace('Questionnaire', '') | humanize_camel }}</td>
+                <td class="py-2.5 px-3">
+                    {% if r.subject and r.subject.reference %}
+                        {% set pid = r.subject.reference.split('/')|last %}
+                        {% set display = r.subject.display if r.subject.display else (pid | replace('Patient', '') | humanize_camel) %}
+                        <a href="/patient/{{ pid }}" class="text-primary-600 hover:underline">{{ display }}</a>
+                    {% else %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Anonymous</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 text-slate-600 whitespace-nowrap">{{ r.authored or 'N/A' }}</td>
+                <td class="py-2.5 px-3 whitespace-nowrap">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">{{ r.status or 'N/A' }}</span>
+                </td>
+                <td class="py-2.5 px-3">
+                    <div class="flex gap-1">
+                        <a href="/response/{{ r.id }}" class="btn-primary btn-sm">View</a>
+                        <a href="/json/QuestionnaireResponse/{{ r.id }}" class="btn-secondary btn-sm">JSON</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="bg-amber-50 text-amber-700 px-4 py-3 rounded-md text-sm">No QuestionnaireResponses found.</div>
+    {% endif %}
+</div>
+{% endblock %}

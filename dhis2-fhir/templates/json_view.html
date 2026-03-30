@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ resource.resourceType }}/{{ resource.id }} — JSON{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-slate-900 mb-4">{{ resource.resourceType }} / {{ resource.id }}</h1>
+
+<div class="flex flex-wrap gap-4 text-sm text-slate-500 mb-5">
+    <div><strong class="text-slate-700">Resource Type:</strong> {{ resource.resourceType }}</div>
+    <div><strong class="text-slate-700">ID:</strong> <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">{{ resource.id }}</code></div>
+    {% if resource.url %}
+    <div><strong class="text-slate-700">URL:</strong> <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">{{ resource.url }}</code></div>
+    {% endif %}
+    {% if resource.title %}
+    <div><strong class="text-slate-700">Title:</strong> {{ resource.title }}</div>
+    {% endif %}
+</div>
+
+{% if expanded_json %}
+<div class="flex gap-2 mb-4">
+    <button onclick="toggleExpanded()" id="toggle-btn" class="btn-primary">Show Expanded (references resolved)</button>
+    {% if resource.resourceType == 'Bundle' and resource.type == 'document' %}
+    <a href="/ips/{{ resource.id }}" class="btn-secondary">View as IPS</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="card p-5" id="json-original">
+    {% if expanded_json %}<h3 class="text-base font-semibold text-slate-700 mb-3">Original</h3>{% endif %}
+    <pre class="rounded-lg overflow-x-auto text-xs leading-relaxed"><code class="language-json">{{ json_str }}</code></pre>
+</div>
+
+{% if expanded_json %}
+<div class="card p-5 mt-4" id="json-expanded" style="display:none;">
+    <h3 class="text-base font-semibold text-slate-700 mb-3">Expanded (references resolved inline)</h3>
+    <pre class="rounded-lg overflow-x-auto text-xs leading-relaxed"><code class="language-json">{{ expanded_json }}</code></pre>
+</div>
+
+<script>
+function toggleExpanded() {
+    var orig = document.getElementById('json-original');
+    var exp = document.getElementById('json-expanded');
+    var btn = document.getElementById('toggle-btn');
+    if (exp.style.display === 'none') {
+        exp.style.display = 'block';
+        orig.style.display = 'none';
+        btn.textContent = 'Show Original';
+    } else {
+        exp.style.display = 'none';
+        orig.style.display = 'block';
+        btn.textContent = 'Show Expanded (references resolved)';
+    }
+}
+</script>
+{% endif %}
+
+<div class="mt-5">
+    <a href="/" class="btn-secondary">Back to list</a>
+</div>
+{% endblock %}

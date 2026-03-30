@@ -1,0 +1,32 @@
+# mdbook output
+site/
+
+# IG Publisher generated
+ig/fsh-generated/
+ig/output/
+ig/temp/
+ig/template/
+ig/input-cache/
+
+# User-created FHIR resources
+data/
+
+# Node/Bun
+node_modules/
+presentation/slides.pdf
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Playwright MCP
+.playwright-mcp/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp

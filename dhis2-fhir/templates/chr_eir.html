@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}EIR — {{ patient.display_name }} — DHIS2-FHIR{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <a href="/chr" class="hover:text-primary-600 no-underline">CHR</a>
+        <span>/</span>
+        <span>{{ patient.display_name }}</span>
+    </div>
+    <h1 class="text-2xl font-bold text-gray-900">{{ patient.display_name }}</h1>
+</div>
+
+<!-- Patient Demographics -->
+<div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Demographics</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div>
+            <span class="text-gray-500">Gender</span>
+            <p class="font-medium">
+                <span class="inline-block px-2 py-0.5 rounded text-xs font-medium {% if patient.gender == 'female' %}bg-pink-100 text-pink-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ patient.gender|capitalize }}
+                </span>
+            </p>
+        </div>
+        <div>
+            <span class="text-gray-500">Date of Birth</span>
+            <p class="font-medium">{{ patient.birthDate or '—' }}</p>
+        </div>
+        {% for addr in patient.address %}
+        <div>
+            <span class="text-gray-500">Province</span>
+            <p class="font-medium">{{ addr.state or '—' }}</p>
+        </div>
+        <div>
+            <span class="text-gray-500">District</span>
+            <p class="font-medium">{{ addr.district or '—' }}</p>
+        </div>
+        <div>
+            <span class="text-gray-500">Village</span>
+            <p class="font-medium">{{ addr.city or '—' }}</p>
+        </div>
+        {% endfor %}
+        {% if patient.phone_numbers %}
+        <div>
+            <span class="text-gray-500">Phone</span>
+            <p class="font-medium">{{ patient.phone_numbers[0] }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Identifiers -->
+    <div class="mt-4 pt-4 border-t border-gray-100">
+        <div class="flex flex-wrap gap-3">
+            {% for ident in patient.identifier_display() %}
+            <span class="inline-flex items-center text-xs">
+                <span class="font-medium text-gray-500">{{ ident.type }}:</span>
+                <code class="ml-1 bg-gray-100 px-1.5 py-0.5 rounded text-gray-700">{{ ident.value }}</code>
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Immunization History -->
+<div class="bg-white rounded-lg border border-gray-200">
+    <div class="px-6 py-3 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-gray-700">Immunization History ({{ immunizations|length }})</h2>
+        <a href="/fhir/Immunization?patient=Patient/{{ patient.id }}" target="_blank" class="text-xs text-primary-600 hover:text-primary-700 no-underline">
+            View as FHIR JSON
+        </a>
+    </div>
+    {% if immunizations %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm table-fixed">
+            <thead>
+                <tr class="border-b border-gray-200 bg-gray-50">
+                    <th class="text-left px-4 py-2 text-gray-500 font-medium w-[30%]">Vaccine</th>
+                    <th class="text-left px-4 py-2 text-gray-500 font-medium w-[12%]">Date</th>
+                    <th class="text-left px-4 py-2 text-gray-500 font-medium w-[8%]">Dose #</th>
+                    <th class="text-left px-4 py-2 text-gray-500 font-medium w-[16%]">Lot Number</th>
+                    <th class="text-left px-4 py-2 text-gray-500 font-medium w-[22%]">Target Disease</th>
+                    <th class="text-left px-4 py-2 text-gray-500 font-medium w-[12%]">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for imm in immunizations %}
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                        <span class="font-medium text-gray-900 truncate block">{{ imm.vaccine_display }}</span>
+                        {% if imm.vaccineCode and imm.vaccineCode.coding %}
+                        <span class="text-xs text-gray-400">CVX {{ imm.vaccineCode.coding[0].code }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-gray-700 whitespace-nowrap">{{ imm.occurrenceDateTime }}</td>
+                    <td class="px-4 py-3">
+                        {% if imm.dose_number %}
+                        <span class="inline-block bg-primary-100 text-primary-700 px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap">
+                            Dose {{ imm.dose_number }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3"><code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded whitespace-nowrap">{{ imm.lotNumber }}</code></td>
+                    <td class="px-4 py-3 text-gray-600">{{ imm.target_disease_display }}</td>
+                    <td class="px-4 py-3">
+                        <a href="/json/Immunization/{{ imm.id }}" class="text-xs text-primary-600 hover:text-primary-700 no-underline">JSON</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="px-6 py-8 text-center text-sm text-gray-500">
+        No immunization records found for this patient.
+    </div>
+    {% endif %}
+</div>
+
+<!-- FHIR URL Reference -->
+<div class="mt-4 bg-gray-50 border border-gray-200 rounded-md p-3">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/Immunization?patient=Patient/{{ patient.id }}</code>
+</div>
+{% endblock %}

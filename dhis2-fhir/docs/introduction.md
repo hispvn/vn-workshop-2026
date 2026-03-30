@@ -1,0 +1,7 @@
+# Introduction
+
+Welcome to the DHIS2-FHIR Learning Guide. This is a hands-on, practical guide designed to take you from zero knowledge of FHIR to confidently authoring FHIR Implementation Guides using FHIR Shorthand (FSH). Along the way, you will learn how DHIS2 concepts -- such as tracked entities, data elements, and programs -- map to FHIR resources, giving you the foundation to bridge these two systems.
+
+This guide is built for learning by doing. Every concept is accompanied by examples and exercises that you can run immediately. All FHIR tooling -- including SUSHI (the FSH compiler), the IG Publisher, and Java -- runs inside a Docker container (`ghcr.io/fhir/ig-publisher-localdev`), so you do not need to install any of these tools on your local machine. The only prerequisites are Docker and a text editor. The documentation itself is built with [mdbook](https://rust-lang.github.io/mdBook/), a lightweight tool for creating books from Markdown files.
+
+Whether you are a DHIS2 developer looking to understand FHIR, a health informaticist exploring interoperability standards, or someone entirely new to both systems, this guide will walk you through the fundamentals step by step. Start with Part I to learn FHIR and FSH basics, then move through setting up your environment, writing FSH definitions, building a complete Implementation Guide, and finally mapping DHIS2 concepts to FHIR.

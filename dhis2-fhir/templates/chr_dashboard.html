@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}CHR Dashboard — DHIS2-FHIR{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Community Health Record</h1>
+    <p class="text-sm text-gray-500 mt-1">Lao PDR CHR / Electronic Immunization Registry</p>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <a href="/chr/patients" class="bg-white rounded-lg border border-gray-200 p-6 hover:border-primary-300 hover:shadow-sm transition-all no-underline block">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-500">CHR Patients</p>
+                <p class="text-2xl font-bold text-gray-900">{{ chr_patient_count }}</p>
+            </div>
+        </div>
+    </a>
+    <a href="/chr/patients" class="bg-white rounded-lg border border-gray-200 p-6 hover:border-primary-300 hover:shadow-sm transition-all no-underline block">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm text-gray-500">Immunization Records</p>
+                <p class="text-2xl font-bold text-gray-900">{{ immunization_count }}</p>
+            </div>
+        </div>
+    </a>
+</div>
+
+<!-- Quick Actions -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <a href="/chr/search" class="bg-white rounded-lg border border-gray-200 p-6 hover:border-primary-300 hover:shadow-sm transition-all no-underline">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Search CHR</h3>
+        <p class="text-sm text-gray-500">Search by unique identifiers (CVID, National ID, Passport) or demographics (name, DOB, sex, village).</p>
+    </a>
+    <a href="/chr/register" class="bg-white rounded-lg border border-gray-200 p-6 hover:border-primary-300 hover:shadow-sm transition-all no-underline">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Register Patient</h3>
+        <p class="text-sm text-gray-500">Register a new patient in the CHR. A Client Health ID will be generated automatically.</p>
+    </a>
+</div>
+
+<!-- Org Unit Hierarchy -->
+<div class="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Organisation Unit Hierarchy</h2>
+    <p class="text-sm text-gray-500 mb-4">The CHR address fields (province, district, village) map to DHIS2 organisation units. Below is the representative subset modelled in the IG.</p>
+    <div class="text-sm text-gray-700 font-mono bg-gray-50 rounded-md p-4 overflow-x-auto">
+        <div>Lao PDR <span class="text-gray-400">(OU_LA)</span></div>
+        <div class="ml-4">
+            <div>Vientiane Capital <span class="text-gray-400">(OU_VTE)</span></div>
+            <div class="ml-4">
+                <div>Chanthabuly <span class="text-gray-400">(OU_VTE_CTB)</span></div>
+                <div class="ml-4 text-gray-600">Anou <span class="text-gray-400">(OU_VTE_CTB_ANU)</span> &middot; Hatsady <span class="text-gray-400">(OU_VTE_CTB_HSD)</span></div>
+                <div>Sisattanak <span class="text-gray-400">(OU_VTE_SSN)</span></div>
+                <div class="ml-4 text-gray-600">Thongkhankham <span class="text-gray-400">(OU_VTE_SSN_TKK)</span></div>
+            </div>
+            <div>Savannakhet <span class="text-gray-400">(OU_SVK)</span></div>
+            <div class="ml-4">
+                <div>Kaysone Phomvihane <span class="text-gray-400">(OU_SVK_KPV)</span></div>
+                <div class="ml-4 text-gray-600">Naxeng <span class="text-gray-400">(OU_SVK_KPV_NXG)</span> &middot; Phonsavang <span class="text-gray-400">(OU_SVK_KPV_PSV)</span></div>
+                <div>Outhoumphone <span class="text-gray-400">(OU_SVK_OTP)</span></div>
+                <div class="ml-4 text-gray-600">Nakham <span class="text-gray-400">(OU_SVK_OTP_NKM)</span></div>
+                <div>Atsaphangthong <span class="text-gray-400">(OU_SVK_APT)</span></div>
+                <div class="ml-4 text-gray-600">Dongsavanh <span class="text-gray-400">(OU_SVK_APT_DSV)</span></div>
+            </div>
+            <div>Luang Prabang <span class="text-gray-400">(OU_LPB)</span></div>
+            <div class="ml-4">
+                <div>Luang Prabang <span class="text-gray-400">(OU_LPB_LPB)</span></div>
+                <div class="ml-4 text-gray-600">Xiengthong <span class="text-gray-400">(OU_LPB_LPB_XTG)</span></div>
+                <div>Chomphet <span class="text-gray-400">(OU_LPB_CPT)</span></div>
+                <div class="ml-4 text-gray-600">Chomphet <span class="text-gray-400">(OU_LPB_CPT_CPT)</span></div>
+                <div>Pak Ou <span class="text-gray-400">(OU_LPB_PKO)</span></div>
+                <div class="ml-4 text-gray-600">Pak Ou <span class="text-gray-400">(OU_LPB_PKO_PKO)</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FHIR API Reference -->
+<div class="bg-white rounded-lg border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">FHIR REST API</h2>
+    <p class="text-sm text-gray-500 mb-4">The CHR exposes standard FHIR REST endpoints. Use these to integrate programmatically.</p>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-gray-200">
+                    <th class="text-left py-2 pr-4 text-gray-500 font-medium">Endpoint</th>
+                    <th class="text-left py-2 pr-4 text-gray-500 font-medium">Method</th>
+                    <th class="text-left py-2 text-gray-500 font-medium">Description</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                <tr class="border-b border-gray-100">
+                    <td class="py-2 pr-4"><code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">/fhir/metadata</code></td>
+                    <td class="py-2 pr-4">GET</td>
+                    <td class="py-2">CapabilityStatement</td>
+                </tr>
+                <tr class="border-b border-gray-100">
+                    <td class="py-2 pr-4"><code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">/fhir/Patient</code></td>
+                    <td class="py-2 pr-4">GET</td>
+                    <td class="py-2">Search patients by identifier, name, gender, birthdate, phone, address</td>
+                </tr>
+                <tr class="border-b border-gray-100">
+                    <td class="py-2 pr-4"><code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">/fhir/Patient/{id}</code></td>
+                    <td class="py-2 pr-4">GET</td>
+                    <td class="py-2">Read a single patient</td>
+                </tr>
+                <tr class="border-b border-gray-100">
+                    <td class="py-2 pr-4"><code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">/fhir/Patient</code></td>
+                    <td class="py-2 pr-4">POST</td>
+                    <td class="py-2">Create patient (conditional create with <code class="bg-gray-100 px-1 py-0.5 rounded text-xs">If-None-Exist</code>)</td>
+                </tr>
+                <tr class="border-b border-gray-100">
+                    <td class="py-2 pr-4"><code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">/fhir/Immunization</code></td>
+                    <td class="py-2 pr-4">GET</td>
+                    <td class="py-2">Search immunizations by patient</td>
+                </tr>
+                <tr>
+                    <td class="py-2 pr-4"><code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">/fhir/Immunization/{id}</code></td>
+                    <td class="py-2 pr-4">GET</td>
+                    <td class="py-2">Read a single immunization</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

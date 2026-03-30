@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
+# ============================================================================
+# ~/.bashrc — Non-login shell entry point
+# ============================================================================
+# Install: cp bashrc ~/.bashrc
+# Purpose: For non-login shells (e.g. new terminal tabs in some setups),
+#          source .bash_profile to get the full environment.
+# ============================================================================
+
+[[ -f "$HOME/.bash_profile" ]] && source "$HOME/.bash_profile"

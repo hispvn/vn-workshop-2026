@@ -1,0 +1,104 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "climate-tools"
+version = "0.1.0"
+description = "Workshop: Introduction to DHIS2 climate tools"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dhis2-client @ git+https://github.com/dhis2/dhis2-python-client",
+    "dhis2eo @ git+https://github.com/dhis2/dhis2eo",
+    "python-dotenv>=1.0",
+    "geopandas>=1.1,<2",
+    "matplotlib>=3.9",
+    "pydantic>=2.12.5",
+    "geojson-pydantic>=2.1.0",
+    "earthkit-transforms>=0.5.3.1",
+    "rioxarray>=0.19.0",
+    "ecmwf-datastores-client>=0.4.2",
+    "httpx>=0.28.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14",
+    "mypy>=1.15",
+    "pyright>=1.1",
+    "pytest>=8.0,<9",
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.6",
+    "mkdocstrings[python]>=0.29",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/climate_tools"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+select = ["E", "W", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "dhis2_client",
+    "dhis2_client.*",
+    "dhis2eo",
+    "dhis2eo.*",
+    "geojson_pydantic",
+    "geojson_pydantic.*",
+    "geopandas",
+    "geopandas.*",
+    "dotenv",
+    "dotenv.*",
+    "shapely",
+    "shapely.*",
+    "pandas",
+    "pandas.*",
+    "numpy",
+    "numpy.*",
+    "xarray",
+    "xarray.*",
+    "earthkit",
+    "earthkit.*",
+]
+ignore_missing_imports = true
+follow_untyped_imports = true
+
+[tool.pyright]
+include = ["src", "examples"]
+exclude = ["**/.venv"]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+useLibraryCodeForTypes = true
+reportPrivateUsage = false
+reportUnusedFunction = false
+reportUnknownMemberType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
+reportMissingTypeArgument = false
+reportMissingTypeStubs = false
+reportUnknownLambdaType = false
+reportMissingImports = "warning"
+reportMissingModuleSource = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

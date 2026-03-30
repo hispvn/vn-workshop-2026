@@ -1,0 +1,58 @@
+site_name: Dev Setup — Reference Configs
+site_description: "Workshop: Shell and terminal configuration reference"
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Shell:
+      - Overview: shell/index.md
+      - bash_profile: shell/bash-profile.md
+      - bash.d Scripts: shell/bash-d.md
+  - Terminal:
+      - Overview: terminal/index.md
+      - Starship: terminal/starship.md
+      - tmux: terminal/tmux.md
+      - Ghostty: terminal/ghostty.md
+  - Concepts: concepts.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+plugins:
+  - search

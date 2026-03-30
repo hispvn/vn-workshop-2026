@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% block title %}Register Patient — CHR — DHIS2-FHIR{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <a href="/chr" class="hover:text-primary-600 no-underline">CHR</a>
+        <span>/</span>
+        <span>Register</span>
+    </div>
+    <h1 class="text-2xl font-bold text-gray-900">Register New Patient</h1>
+    <p class="text-sm text-gray-500 mt-1">A Client Health ID will be generated automatically on creation.</p>
+</div>
+
+<div class="bg-white rounded-lg border border-gray-200 p-6">
+    <form id="register-form" onsubmit="return submitRegistration(event)">
+        <!-- Required Fields -->
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Required Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="given_name" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="family_name" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth <span class="text-red-500">*</span></label>
+                    <input type="date" id="birth_date" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sex <span class="text-red-500">*</span></label>
+                    <select id="gender" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                        <option value="">Select...</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address -->
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Address</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                    <select id="province" onchange="updateDistricts()" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                        <option value="">Select province...</option>
+                    </select>
+                    <input type="hidden" id="province_code">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">District</label>
+                    <select id="district" onchange="updateVillages()" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" disabled>
+                        <option value="">Select district...</option>
+                    </select>
+                    <input type="hidden" id="district_code">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Village</label>
+                    <select id="village" onchange="updateVillageCode()" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" disabled>
+                        <option value="">Select village...</option>
+                    </select>
+                    <input type="hidden" id="village_code">
+                </div>
+            </div>
+        </div>
+
+        <!-- Demographics -->
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Demographics</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                    <input type="text" id="nationality" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" value="Lao">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ethnicity</label>
+                    <input type="text" id="ethnicity" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+                    <input type="text" id="mobile" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" placeholder="+856-20-...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Optional Identifiers -->
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Optional Identifiers</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">CVID</label>
+                    <input type="text" id="cvid" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">National ID (Green Card)</label>
+                    <input type="text" id="national_id" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Passport</label>
+                    <input type="text" id="passport" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button type="submit" class="btn-primary" id="submit-btn">Register Patient</button>
+            <a href="/chr" class="btn-secondary no-underline">Cancel</a>
+        </div>
+    </form>
+
+    <!-- Result Display -->
+    <div id="result" class="hidden mt-6 p-4 bg-green-50 border border-green-200 rounded-md">
+        <h3 class="text-sm font-semibold text-green-800 mb-2">Patient Registered Successfully</h3>
+        <p class="text-sm text-green-700">Client Health ID: <code id="result-chr-id" class="bg-green-100 px-1.5 py-0.5 rounded font-bold"></code></p>
+        <a id="result-link" href="#" class="text-sm text-primary-600 hover:text-primary-700 mt-2 inline-block no-underline">View Patient EIR</a>
+    </div>
+</div>
+
+<script>
+// Org unit hierarchy data
+const ORG_UNITS = {
+    "Vientiane Capital": {
+        code: "OU_VTE",
+        districts: {
+            "Chanthabuly": { code: "OU_VTE_CTB", villages: { "Anou": "OU_VTE_CTB_ANU", "Hatsady": "OU_VTE_CTB_HSD" } },
+            "Sisattanak": { code: "OU_VTE_SSN", villages: { "Thongkhankham": "OU_VTE_SSN_TKK" } }
+        }
+    },
+    "Savannakhet": {
+        code: "OU_SVK",
+        districts: {
+            "Kaysone Phomvihane": { code: "OU_SVK_KPV", villages: { "Naxeng": "OU_SVK_KPV_NXG", "Phonsavang": "OU_SVK_KPV_PSV" } },
+            "Outhoumphone": { code: "OU_SVK_OTP", villages: { "Nakham": "OU_SVK_OTP_NKM" } },
+            "Atsaphangthong": { code: "OU_SVK_APT", villages: { "Dongsavanh": "OU_SVK_APT_DSV" } }
+        }
+    },
+    "Luang Prabang": {
+        code: "OU_LPB",
+        districts: {
+            "Luang Prabang": { code: "OU_LPB_LPB", villages: { "Xiengthong": "OU_LPB_LPB_XTG" } },
+            "Chomphet": { code: "OU_LPB_CPT", villages: { "Chomphet": "OU_LPB_CPT_CPT" } },
+            "Pak Ou": { code: "OU_LPB_PKO", villages: { "Pak Ou": "OU_LPB_PKO_PKO" } }
+        }
+    }
+};
+
+// Populate province dropdown on load
+(function() {
+    const sel = document.getElementById('province');
+    for (const name of Object.keys(ORG_UNITS)) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+    }
+})();
+
+function updateDistricts() {
+    const prov = document.getElementById('province').value;
+    const distSel = document.getElementById('district');
+    const vilSel = document.getElementById('village');
+    distSel.innerHTML = '<option value="">Select district...</option>';
+    vilSel.innerHTML = '<option value="">Select village...</option>';
+    vilSel.disabled = true;
+    document.getElementById('province_code').value = '';
+    document.getElementById('district_code').value = '';
+    document.getElementById('village_code').value = '';
+
+    if (!prov || !ORG_UNITS[prov]) { distSel.disabled = true; return; }
+    document.getElementById('province_code').value = ORG_UNITS[prov].code;
+    distSel.disabled = false;
+    for (const name of Object.keys(ORG_UNITS[prov].districts)) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        distSel.appendChild(opt);
+    }
+}
+
+function updateVillages() {
+    const prov = document.getElementById('province').value;
+    const dist = document.getElementById('district').value;
+    const vilSel = document.getElementById('village');
+    vilSel.innerHTML = '<option value="">Select village...</option>';
+    document.getElementById('district_code').value = '';
+    document.getElementById('village_code').value = '';
+
+    if (!prov || !dist || !ORG_UNITS[prov]?.districts[dist]) { vilSel.disabled = true; return; }
+    const distObj = ORG_UNITS[prov].districts[dist];
+    document.getElementById('district_code').value = distObj.code;
+    vilSel.disabled = false;
+    for (const name of Object.keys(distObj.villages)) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        vilSel.appendChild(opt);
+    }
+}
+
+function updateVillageCode() {
+    const prov = document.getElementById('province').value;
+    const dist = document.getElementById('district').value;
+    const vil = document.getElementById('village').value;
+    const villages = ORG_UNITS[prov]?.districts[dist]?.villages || {};
+    document.getElementById('village_code').value = villages[vil] || '';
+}
+
+async function submitRegistration(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Registering...';
+
+    const laoCs = 'http://moh.gov.la/fhir/CodeSystem/identifier-type';
+    const identifiers = [];
+
+    const cvid = document.getElementById('cvid').value.trim();
+    if (cvid) {
+        identifiers.push({
+            system: 'http://moh.gov.la/fhir/id/cvid', value: cvid,
+            type: { coding: [{ system: laoCs, code: 'CVID', display: 'Civil Registration and Vital Statistics ID' }] }
+        });
+    }
+    const natId = document.getElementById('national_id').value.trim();
+    if (natId) {
+        identifiers.push({
+            system: 'http://moh.gov.la/fhir/id/green-national-id', value: natId,
+            type: { coding: [{ system: laoCs, code: 'GREENCARD', display: 'Lao Green National ID Card' }] }
+        });
+    }
+    const passport = document.getElementById('passport').value.trim();
+    if (passport) {
+        identifiers.push({
+            system: 'http://example.org/passport', value: passport,
+            type: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/v2-0203', code: 'PPN', display: 'Passport' }] }
+        });
+    }
+
+    const givenName = document.getElementById('given_name').value.trim();
+    const familyName = document.getElementById('family_name').value.trim();
+    const searchParams = `identifier=http://moh.gov.la/fhir/id/cvid|${cvid}`;
+
+    const provName = document.getElementById('province').value;
+    const distName = document.getElementById('district').value;
+    const vilName = document.getElementById('village').value;
+    const provCode = document.getElementById('province_code').value;
+    const distCode = document.getElementById('district_code').value;
+    const vilCode = document.getElementById('village_code').value;
+
+    const addrExtensions = [];
+    const extUrl = 'http://moh.gov.la/fhir/StructureDefinition/chr-org-unit-code';
+    if (provCode) addrExtensions.push({ url: extUrl, valueString: provCode });
+    if (distCode) addrExtensions.push({ url: extUrl, valueString: distCode });
+    if (vilCode) addrExtensions.push({ url: extUrl, valueString: vilCode });
+
+    const address = { use: 'home', state: provName, district: distName, city: vilName, country: 'Lao PDR' };
+    if (addrExtensions.length) address.extension = addrExtensions;
+
+    const body = {
+        resourceType: 'Patient',
+        identifier: identifiers,
+        name: [{ use: 'official', family: familyName, given: givenName.split(/\s+/) }],
+        gender: document.getElementById('gender').value,
+        birthDate: document.getElementById('birth_date').value,
+        active: true,
+        address: [address],
+        telecom: [],
+        extension: []
+    };
+
+    const mobile = document.getElementById('mobile').value.trim();
+    if (mobile) body.telecom.push({ system: 'phone', value: mobile, use: 'mobile' });
+
+    const nationality = document.getElementById('nationality').value.trim();
+    if (nationality) body.extension.push({ url: 'http://moh.gov.la/fhir/StructureDefinition/chr-nationality', valueString: nationality });
+
+    const ethnicity = document.getElementById('ethnicity').value.trim();
+    if (ethnicity) body.extension.push({ url: 'http://moh.gov.la/fhir/StructureDefinition/chr-ethnicity', valueString: ethnicity });
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (cvid) headers['If-None-Exist'] = searchParams;
+
+    try {
+        const resp = await fetch('/fhir/Patient', { method: 'POST', headers, body: JSON.stringify(body) });
+        const data = await resp.json();
+
+        const chrIdent = (data.identifier || []).find(i => i.system === 'http://moh.gov.la/fhir/id/client-health-id');
+        const chrId = chrIdent ? chrIdent.value : 'N/A';
+        const patientId = data.id || '';
+
+        document.getElementById('result-chr-id').textContent = chrId;
+        document.getElementById('result-link').href = '/chr/patient/' + patientId + '/eir';
+        document.getElementById('result').classList.remove('hidden');
+
+        btn.textContent = 'Registered';
+    } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Register Patient';
+        alert('Error: ' + err.message);
+    }
+}
+</script>
+{% endblock %}

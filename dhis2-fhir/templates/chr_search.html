@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}CHR Search — DHIS2-FHIR{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{{ page_title|default("CHR Search") }}</h1>
+    <p class="text-sm text-gray-500 mt-1">{{ page_subtitle|default("Search the Community Health Record by identifier or demographics") }}</p>
+</div>
+
+<!-- Search Tabs -->
+<div class="bg-white rounded-lg border border-gray-200 mb-6">
+    <div class="border-b border-gray-200">
+        <nav class="flex -mb-px">
+            <button onclick="switchTab('identifier')" id="tab-identifier"
+                class="px-6 py-3 text-sm font-medium border-b-2 border-primary-500 text-primary-600">
+                Search by Identifier
+            </button>
+            <button onclick="switchTab('attributes')" id="tab-attributes"
+                class="px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                Search by Demographics
+            </button>
+        </nav>
+    </div>
+
+    <!-- Panel 1: Search by Identifier -->
+    <div id="panel-identifier" class="p-6">
+        <form method="get" action="/chr/search">
+            <input type="hidden" name="search_mode" value="identifier">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Identifier Type</label>
+                    <select name="id_type" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                        <option value="clientHealthId" {% if id_type == 'clientHealthId' %}selected{% endif %}>Client Health ID</option>
+                        <option value="cvid" {% if id_type == 'cvid' %}selected{% endif %}>CVID</option>
+                        <option value="nationalId" {% if id_type == 'nationalId' %}selected{% endif %}>National ID (Green Card)</option>
+                        <option value="passport" {% if id_type == 'passport' %}selected{% endif %}>Passport</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                    <input type="text" name="id_value" value="{{ id_value }}" required placeholder="Enter identifier value"
+                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="btn-primary">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Panel 2: Search by Demographics -->
+    <div id="panel-attributes" class="p-6 hidden">
+        <form method="get" action="/chr/search">
+            <input type="hidden" name="search_mode" value="attributes">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input type="text" name="firstname" value="{{ firstname }}" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input type="text" name="lastname" value="{{ lastname }}" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sex</label>
+                    <select name="sex" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                        <option value="">Any</option>
+                        <option value="male" {% if sex == 'male' %}selected{% endif %}>Male</option>
+                        <option value="female" {% if sex == 'female' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                    <input type="date" name="dob" value="{{ dob }}" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+                    <input type="text" name="mobile" value="{{ mobile }}" placeholder="+856-20-..." class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Village</label>
+                    <select name="village" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                        <option value="">Any</option>
+                        {% for v in villages %}
+                        <option value="{{ v }}" {% if village == v %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Search</button>
+        </form>
+    </div>
+</div>
+
+<!-- FHIR URL Display (live-updated) -->
+<div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-6">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2" id="fhir-url">GET /fhir/Patient</code>
+</div>
+
+<!-- Results -->
+{% if searched %}
+<div class="bg-white rounded-lg border border-gray-200">
+    <div class="px-6 py-3 border-b border-gray-200">
+        <h2 class="text-sm font-medium text-gray-700">Results ({{ results|length }})</h2>
+    </div>
+    {% if results %}
+    <div class="divide-y divide-gray-100">
+        {% for p in results %}
+        <div class="px-6 py-4 hover:bg-gray-50">
+            <div class="flex items-start justify-between">
+                <div>
+                    <a href="/chr/patient/{{ p.id }}/eir" class="text-sm font-semibold text-primary-700 hover:text-primary-600 no-underline">
+                        {{ p.display_name }}
+                    </a>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium {% if p.gender == 'female' %}bg-pink-100 text-pink-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                            {{ p.gender|capitalize }}
+                        </span>
+                        {% if p.birthDate %}
+                        <span class="text-xs text-gray-500">DOB: {{ p.birthDate }}</span>
+                        {% endif %}
+                        {% for addr in p.address %}
+                        <span class="text-xs text-gray-500">{{ addr.city }}{% if addr.district %}, {{ addr.district }}{% endif %}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        {% for ident in p.identifier_display() %}
+                        <span class="inline-flex items-center text-xs">
+                            <span class="font-medium text-gray-500">{{ ident.type }}:</span>
+                            <code class="ml-1 bg-gray-100 px-1.5 py-0.5 rounded text-gray-700">{{ ident.value }}</code>
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <a href="/chr/patient/{{ p.id }}/eir" class="btn-primary btn-sm no-underline">EIR</a>
+                    <a href="/json/Patient/{{ p.id }}" class="btn-secondary btn-sm no-underline">JSON</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="px-6 py-8 text-center text-sm text-gray-500">
+        No patients found matching your search criteria.
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+var activeTab = 'identifier';
+function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById('panel-identifier').classList.toggle('hidden', tab !== 'identifier');
+    document.getElementById('panel-attributes').classList.toggle('hidden', tab !== 'attributes');
+    document.getElementById('tab-identifier').classList.toggle('border-primary-500', tab === 'identifier');
+    document.getElementById('tab-identifier').classList.toggle('text-primary-600', tab === 'identifier');
+    document.getElementById('tab-identifier').classList.toggle('border-transparent', tab !== 'identifier');
+    document.getElementById('tab-identifier').classList.toggle('text-gray-500', tab !== 'identifier');
+    document.getElementById('tab-attributes').classList.toggle('border-primary-500', tab === 'attributes');
+    document.getElementById('tab-attributes').classList.toggle('text-primary-600', tab === 'attributes');
+    document.getElementById('tab-attributes').classList.toggle('border-transparent', tab !== 'attributes');
+    document.getElementById('tab-attributes').classList.toggle('text-gray-500', tab !== 'attributes');
+    updateFhirUrl();
+}
+
+var idSystems = {
+    clientHealthId: 'http://moh.gov.la/fhir/id/client-health-id',
+    cvid: 'http://moh.gov.la/fhir/id/cvid',
+    nationalId: 'http://moh.gov.la/fhir/id/green-national-id',
+    passport: 'http://example.org/passport'
+};
+
+function updateFhirUrl() {
+    var params = [];
+    if (activeTab === 'identifier') {
+        var idType = document.querySelector('#panel-identifier select[name="id_type"]').value;
+        var idValue = document.querySelector('#panel-identifier input[name="id_value"]').value;
+        if (idType && idValue) params.push('identifier=' + (idSystems[idType] || '') + '|' + idValue);
+    } else {
+        var fields = {firstname: 'given', lastname: 'family', sex: 'gender', dob: 'birthdate', mobile: 'phone', village: 'address-city'};
+        for (var name in fields) {
+            var el = document.querySelector('#panel-attributes [name="' + name + '"]');
+            if (el && el.value) params.push(fields[name] + '=' + el.value);
+        }
+    }
+    var url = 'GET /fhir/Patient' + (params.length ? '?' + params.join('&') : '');
+    document.getElementById('fhir-url').textContent = url;
+}
+
+// Listen to all form inputs
+document.querySelectorAll('#panel-identifier input, #panel-identifier select, #panel-attributes input, #panel-attributes select').forEach(function(el) {
+    el.addEventListener('input', updateFhirUrl);
+    el.addEventListener('change', updateFhirUrl);
+});
+
+{% if search_mode == 'attributes' %}switchTab('attributes');{% endif %}
+updateFhirUrl();
+</script>
+{% endblock %}

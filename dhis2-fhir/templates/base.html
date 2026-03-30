@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DHIS2-FHIR Resource Renderer{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81' },
+                    sidebar: { 800: '#1e293b', 900: '#0f172a' },
+                }
+            }
+        }
+    }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .btn-primary { @apply inline-block px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-md hover:bg-primary-700 transition-colors; }
+            .btn-secondary { @apply inline-block px-4 py-2 bg-slate-500 text-white text-sm font-medium rounded-md hover:bg-slate-600 transition-colors; }
+            .btn-danger { @apply inline-block px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors; }
+            .btn-sm { @apply px-3 py-1.5 text-xs; }
+            .zebra-table tbody tr:nth-child(even) { @apply bg-slate-50/60; }
+            .zebra-table tbody tr:hover { @apply bg-primary-50/50; }
+            .card { @apply bg-white rounded-xl border border-slate-200/80 shadow-sm; }
+            .card-accent-blue { @apply border-l-4 border-l-blue-500; }
+            .card-accent-green { @apply border-l-4 border-l-emerald-500; }
+            .card-accent-amber { @apply border-l-4 border-l-amber-500; }
+            .card-accent-purple { @apply border-l-4 border-l-purple-500; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar Nav -->
+        <nav class="w-56 bg-sidebar-900 flex-shrink-0 fixed h-full overflow-y-auto">
+            <div class="p-5 border-b border-white/10">
+                <a href="/" class="text-lg font-bold text-white hover:text-primary-300 no-underline">DHIS2-FHIR</a>
+                <p class="text-xs text-slate-400 mt-1">Resource Renderer</p>
+            </div>
+            <ul class="py-4 space-y-0.5 px-2">
+                {% set current_path = request.url.path if request else '/' %}
+                <li>
+                    <a href="/" class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors no-underline
+                        {% if current_path == '/' %}bg-white/10 text-white font-medium{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                        <svg class="w-4 h-4 mr-3 {% if current_path == '/' %}text-primary-400{% else %}text-slate-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="/patients" class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors no-underline
+                        {% if current_path.startswith('/patient') %}bg-white/10 text-white font-medium{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                        <svg class="w-4 h-4 mr-3 {% if current_path.startswith('/patient') %}text-primary-400{% else %}text-slate-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Patients
+                    </a>
+                </li>
+                <li>
+                    <a href="/chr" class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors no-underline
+                        {% if current_path.startswith('/chr') %}bg-white/10 text-white font-medium{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                        <svg class="w-4 h-4 mr-3 {% if current_path.startswith('/chr') %}text-primary-400{% else %}text-slate-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        CHR
+                    </a>
+                </li>
+                <li>
+                    <a href="/forms" class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors no-underline
+                        {% if current_path.startswith('/questionnaire') or current_path.startswith('/response') or current_path.startswith('/form') %}bg-white/10 text-white font-medium{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                        <svg class="w-4 h-4 mr-3 {% if current_path.startswith('/questionnaire') or current_path.startswith('/response') or current_path.startswith('/form') %}text-primary-400{% else %}text-slate-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        Forms
+                    </a>
+                </li>
+                <li>
+                    <a href="/ips" class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors no-underline
+                        {% if current_path.startswith('/ips') %}bg-white/10 text-white font-medium{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                        <svg class="w-4 h-4 mr-3 {% if current_path.startswith('/ips') %}text-primary-400{% else %}text-slate-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        IPS Bundles
+                    </a>
+                </li>
+            </ul>
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
+                <a href="/fhir/metadata" class="flex items-center px-3 py-2 text-xs text-slate-500 hover:text-slate-300 rounded-lg hover:bg-white/5 transition-colors no-underline">
+                    <svg class="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                    FHIR API
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-56 p-8 max-w-5xl">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

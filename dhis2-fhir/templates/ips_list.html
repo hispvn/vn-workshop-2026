@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}IPS Bundles — DHIS2-FHIR{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-800 mb-2">International Patient Summaries ({{ bundles|length }})</h1>
+<p class="text-gray-500 mb-6">IPS document Bundles containing Patient demographics and Immunization records.</p>
+
+{% if bundles %}
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-gray-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Patient</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Gender</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Birth Date</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Immunizations</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Timestamp</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in bundles %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-2.5 px-3 font-medium">
+                    {% if b.patient %}{{ b.patient.name }}{% else %}<em class="text-gray-400">Unknown</em>{% endif %}
+                </td>
+                <td class="py-2.5 px-3">
+                    {% if b.patient %}
+                        {% if b.patient.gender == 'female' %}
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-pink-50 text-pink-700">Female</span>
+                        {% elif b.patient.gender == 'male' %}
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Male</span>
+                        {% else %}
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">{{ b.patient.gender }}</span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 text-gray-600">{{ b.patient.birthDate if b.patient else '' }}</td>
+                <td class="py-2.5 px-3">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">{{ b.imm_count }} vaccines</span>
+                </td>
+                <td class="py-2.5 px-3"><code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">{{ b.timestamp[:10] if b.timestamp else 'N/A' }}</code></td>
+                <td class="py-2.5 px-3 space-x-1">
+                    <a href="/ips/{{ b.id }}" class="btn-primary btn-sm">View</a>
+                    <a href="/json/Bundle/{{ b.id }}" class="btn-secondary btn-sm">JSON</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="bg-amber-50 text-amber-700 px-4 py-3 rounded-md text-sm">No IPS Bundles found. Run <code class="bg-amber-100 px-1 rounded">make docker-sushi</code> to compile FSH files.</div>
+{% endif %}
+{% endblock %}

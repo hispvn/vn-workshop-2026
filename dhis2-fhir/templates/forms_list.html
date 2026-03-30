@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Forms — DHIS2-FHIR{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-slate-900 mb-1">Forms</h1>
+<p class="text-slate-500 mb-6">Questionnaire definitions and submitted responses.</p>
+
+<!-- Questionnaires -->
+<div class="card card-accent-amber p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Questionnaires ({{ questionnaires|length }})</h2>
+    <p class="text-sm text-slate-500 mb-4">Each form definition maps to a DHIS2 program stage.</p>
+    {% if questionnaires %}
+    <table class="w-full text-sm zebra-table">
+        <thead>
+            <tr class="border-b border-slate-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Title</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Fields</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Subject</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for q in questionnaires %}
+            <tr class="border-b border-slate-100">
+                <td class="py-2.5 px-3 font-medium">{{ q.display_title }}</td>
+                <td class="py-2.5 px-3 text-slate-600">{{ q.item|length }}</td>
+                <td class="py-2.5 px-3">
+                    {% if q.subjectType %}
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">{{ q.subjectType|join(', ') }}</span>
+                    {% else %}
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Anonymous</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3">
+                    <div class="flex gap-1">
+                        <a href="/questionnaire/{{ q.id }}" class="btn-primary btn-sm">View</a>
+                        <a href="/json/Questionnaire/{{ q.id }}" class="btn-secondary btn-sm">JSON</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<!-- Fill a form for a patient -->
+<div class="card card-accent-blue p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Fill a Form</h2>
+    <p class="text-sm text-slate-500 mb-4">Select a patient and a questionnaire to fill out.</p>
+    <form method="get" id="fill-form">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Patient</label>
+                <select id="fill-patient" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
+                    <option value="">Select patient...</option>
+                    {% for p in patients[:50] %}
+                    <option value="{{ p.id }}">{{ p.display_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Questionnaire</label>
+                <select id="fill-questionnaire" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
+                    {% for q in questionnaires %}
+                    <option value="{{ q.id }}">{{ q.display_title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="button" onclick="goFillForm()" class="btn-primary">Start</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Submitted Responses -->
+<div class="card card-accent-purple p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Submitted Responses ({{ responses|length }})</h2>
+    {% if responses %}
+    <table class="w-full text-sm zebra-table">
+        <thead>
+            <tr class="border-b border-slate-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">ID</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Questionnaire</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Subject</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Date</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in responses %}
+            <tr class="border-b border-slate-100">
+                <td class="py-2.5 px-3"><code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded whitespace-nowrap">{{ r.id | replace('QuestionnaireResponse', 'QR') }}</code></td>
+                <td class="py-2.5 px-3">{{ r.questionnaire.split('/')|last | replace('Questionnaire', '') | humanize_camel }}</td>
+                <td class="py-2.5 px-3">
+                    {% if r.subject and r.subject.reference %}
+                    {% set pid = r.subject.reference.split('/')|last %}
+                    {% set display = r.subject.display if r.subject.display else (pid | replace('Patient', '') | humanize_camel) %}
+                    <a href="/patient/{{ pid }}" class="text-primary-600 hover:underline">{{ display }}</a>
+                    {% else %}
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Anonymous</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 text-slate-600 whitespace-nowrap">{{ r.authored or 'N/A' }}</td>
+                <td class="py-2.5 px-3">
+                    <div class="flex gap-1">
+                        <a href="/response/{{ r.id }}" class="btn-primary btn-sm">View</a>
+                        <a href="/json/QuestionnaireResponse/{{ r.id }}" class="btn-secondary btn-sm">JSON</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-sm text-slate-500">No responses submitted yet.</p>
+    {% endif %}
+</div>
+
+<script>
+function goFillForm() {
+    var pid = document.getElementById('fill-patient').value;
+    var qid = document.getElementById('fill-questionnaire').value;
+    if (!pid) { alert('Please select a patient'); return; }
+    if (!qid) { alert('Please select a questionnaire'); return; }
+    window.location.href = '/patient/' + pid + '/form/' + qid;
+}
+</script>
+{% endblock %}

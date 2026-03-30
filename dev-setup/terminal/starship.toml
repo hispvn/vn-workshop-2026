@@ -1,0 +1,55 @@
+# ============================================================================
+# Starship Prompt Configuration
+# ============================================================================
+# Install: cp starship.toml ~/.config/starship.toml
+# Purpose: Cross-shell prompt with git, language, and Docker context info.
+# Prerequisites: brew install starship + a Nerd Font
+# Docs: https://starship.rs/config/
+# ============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = false
+command_timeout = 5000
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[✗](bold red)"     # Symbol for a failed command
+
+[line_break]
+disabled = false
+
+[directory]
+read_only = "[ro]"           # Indicator for read-only directories
+read_only_style = "red bold" # Styling for the read-only indicator
+
+# Git Status Module
+[git_status]
+staged = "✓"          # Icon for staged files
+style = "bold yellow" # Styling for the Git status module
+
+# Git Branch Module
+[git_branch]
+symbol = " "           # Symbol for the current branch
+style = "bold purple" # Styling for the branch name
+
+# Package Module
+[package]
+disabled = false       # Enable the package version module
+display_private = true # Display private packages
+style = "cyan"         # Styling for the package version
+
+# NodeJS Module
+[nodejs]
+symbol = "⬢ "        # Symbol for Node.js version
+style = "green bold" # Styling for the Node.js module
+
+# Python Module
+[python]
+symbol = "🐍 "       # Symbol for Python version
+style = "blue bold" # Styling for the Python module
+
+# Docker Context Module
+[docker_context]
+symbol = "🐳 "       # Symbol for Docker context
+style = "cyan bold" # Styling for the Docker module

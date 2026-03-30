@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: prefect
+      POSTGRES_PASSWORD: prefect
+      POSTGRES_DB: prefect
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "prefect"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  prefect-server:
+    image: prefecthq/prefect:3-python3.13
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres:5432/prefect
+      PREFECT_SERVER_ANALYTICS_ENABLED: "false"
+      PREFECT_SERVER_UI_SHOW_PROMOTIONAL_CONTENT: "false"
+    ports:
+      - "4200:4200"
+    command: prefect server start --host 0.0.0.0
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:4200/api/health').raise_for_status()"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  basics:
+    build:
+      context: .
+      dockerfile: deployments/basics/Dockerfile
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+    restart: unless-stopped
+
+  advanced:
+    build:
+      context: .
+      dockerfile: deployments/advanced/Dockerfile
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+    restart: unless-stopped
+
+  dhis2-org-units:
+    build:
+      context: .
+      dockerfile: deployments/dhis2_org_units/Dockerfile
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

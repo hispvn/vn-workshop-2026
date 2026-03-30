@@ -1,0 +1,88 @@
+id: dhis2.fhir.learning
+canonical: http://dhis2.org/fhir/learning
+name: DHIS2FHIRLearningIG
+title: DHIS2-FHIR Learning Implementation Guide
+description: A learning Implementation Guide for DHIS2-to-FHIR mapping concepts
+status: draft
+version: 0.1.0
+fhirVersion: 4.0.1
+copyrightYear: 2024+
+releaseLabel: ci-build
+license: CC0-1.0
+jurisdiction: http://unstats.un.org/unsd/methods/m49/m49.htm#001 "World"
+publisher:
+  name: DHIS2-FHIR Learning
+  url: http://dhis2.org/fhir/learning
+
+parameters:
+  special-url:
+    - http://moh.gov.la/fhir/CodeSystem/identifier-type
+    - http://moh.gov.la/fhir/CodeSystem/chr-blood-group
+    - http://moh.gov.la/fhir/CodeSystem/chr-education
+    - http://moh.gov.la/fhir/CodeSystem/chr-ethnicity
+    - http://moh.gov.la/fhir/CodeSystem/chr-identification-field
+    - http://moh.gov.la/fhir/CodeSystem/chr-identifier-type
+    - http://moh.gov.la/fhir/CodeSystem/chr-nationality
+    - http://moh.gov.la/fhir/CodeSystem/chr-occupation
+    - http://moh.gov.la/fhir/CodeSystem/chr-org-unit-level
+    - http://moh.gov.la/fhir/CodeSystem/chr-sex
+    - http://moh.gov.la/fhir/CodeSystem/place-of-vaccination
+    - http://moh.gov.la/fhir/ValueSet/chr-blood-group
+    - http://moh.gov.la/fhir/ValueSet/chr-education
+    - http://moh.gov.la/fhir/ValueSet/chr-ethnicity
+    - http://moh.gov.la/fhir/ValueSet/chr-identification-field
+    - http://moh.gov.la/fhir/ValueSet/chr-identifier-type
+    - http://moh.gov.la/fhir/ValueSet/chr-nationality
+    - http://moh.gov.la/fhir/ValueSet/chr-occupation
+    - http://moh.gov.la/fhir/ValueSet/chr-org-unit-level
+    - http://moh.gov.la/fhir/ValueSet/chr-sex
+    - http://moh.gov.la/fhir/ValueSet/place-of-vaccination
+
+instanceOptions:
+  manualSliceOrdering: true
+
+menu:
+  Home: index.html
+  Profiles:
+    DHIS2 Patient: StructureDefinition-dhis2-patient.html
+    DHIS2 Observation: StructureDefinition-dhis2-observation.html
+    DHIS2 Encounter: StructureDefinition-dhis2-encounter.html
+    DHIS2 Episode of Care: StructureDefinition-dhis2-episode-of-care.html
+    DHIS2 Organization: StructureDefinition-dhis2-organization.html
+    DHIS2 Location: StructureDefinition-dhis2-location.html
+    DHIS2 Questionnaire: StructureDefinition-dhis2-questionnaire.html
+    DHIS2 QuestionnaireResponse: StructureDefinition-dhis2-questionnaire-response.html
+    DHIS2 Measure: StructureDefinition-dhis2-measure.html
+    DHIS2 MeasureReport: StructureDefinition-dhis2-measure-report.html
+    DHIS2 CHR Patient: StructureDefinition-dhis2-chr-patient.html
+    DHIS2 CHR Immunization: StructureDefinition-dhis2-chr-immunization.html
+  Terminology:
+    Data Element Types: CodeSystem-dhis2-data-element-type.html
+    Program Types: CodeSystem-dhis2-program-type.html
+    Event Status: CodeSystem-dhis2-event-status.html
+    Enrollment Status: CodeSystem-dhis2-enrollment-status.html
+    Aggregation Types: CodeSystem-dhis2-aggregation-type.html
+    Org Unit Levels: CodeSystem-DHIS2OrgUnitLevelCS.html
+    Org Unit Groups: CodeSystem-DHIS2OrgUnitGroupCS.html
+    Gender: CodeSystem-dhis2-gender.html
+    Yes/No: CodeSystem-dhis2-yes-no.html
+    Test Result: CodeSystem-dhis2-test-result.html
+    HIV Status: CodeSystem-dhis2-hiv-status.html
+    Visit Type: CodeSystem-dhis2-visit-type.html
+    Delivery Mode: CodeSystem-dhis2-delivery-mode.html
+    Malaria Species: CodeSystem-dhis2-malaria-species.html
+    Vaccines: CodeSystem-dhis2-immunization-vaccine.html
+    Pregnancy Outcome: CodeSystem-dhis2-pregnancy-outcome.html
+    Lao Identifier Types: CodeSystem-lao-identifier-type.html
+    CHR Org Unit Level: CodeSystem-chr-org-unit-level.html
+    CHR Identifier Type: CodeSystem-chr-identifier-type.html
+    CHR Place of Vaccination: CodeSystem-chr-place-of-vaccination.html
+    CHR Ethnicity: CodeSystem-chr-ethnicity.html
+    CHR Nationality: CodeSystem-chr-nationality.html
+    CHR Occupation: CodeSystem-chr-occupation.html
+    CHR Education: CodeSystem-chr-education.html
+    CHR Blood Group: CodeSystem-chr-blood-group.html
+    CHR Sex: CodeSystem-chr-sex.html
+    CHR Identification Field: CodeSystem-chr-identification-field.html
+  Examples: artifacts.html#example-example-instances
+  Artifacts: artifacts.html

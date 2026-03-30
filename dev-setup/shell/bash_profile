@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1090,SC1091
+# ============================================================================
+# ~/.bash_profile — Main shell entry point
+# ============================================================================
+# Install: cp bash_profile ~/.bash_profile
+# Purpose: Login shell setup — locale, OS detection, Homebrew, PATH, and
+#          sourcing of modular bash.d scripts.
+# Prerequisites: None (Homebrew recommended on macOS)
+# ============================================================================
+
+# ====================================
+# Locale
+# ====================================
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
+# ====================================
+# OS Detection
+# ====================================
+DOTFILES_OS="$(uname -s)"
+export DOTFILES_OS
+
+# ====================================
+# Homebrew
+# ====================================
+case "$DOTFILES_OS" in
+  Darwin)
+    if [[ -f /opt/homebrew/bin/brew ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -f /usr/local/bin/brew ]]; then
+      eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    ;;
+  Linux)
+    if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
+    ;;
+esac
+
+# ====================================
+# SSH Agent
+# ====================================
+# Configure your SSH agent here. Examples:
+#   export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"   # Custom socket
+#   eval "$(ssh-agent -s)"                         # Start ssh-agent
+
+# ====================================
+# Core PATH
+# ====================================
+[[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
+[[ -d "$HOME/bin" ]] && export PATH="$HOME/bin:$PATH"
+
+# ====================================
+# Rust / Cargo
+# ====================================
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+
+# ====================================
+# Source modular bash.d scripts
+# ====================================
+if [[ -d "$HOME/.bash.d" ]]; then
+  for file in "$HOME/.bash.d"/*.sh; do
+    [[ -f "$file" && -r "$file" ]] && source "$file"
+  done
+fi
+
+# ====================================
+# Machine-specific overrides (not tracked)
+# ====================================
+[[ -f "$HOME/.bash_local" ]] && source "$HOME/.bash_local"

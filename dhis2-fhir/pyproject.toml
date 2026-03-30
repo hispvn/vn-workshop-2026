@@ -1,0 +1,74 @@
+[project]
+name = "dhis2-fhir"
+version = "0.1.0"
+description = "DHIS2-FHIR Learning IG resource renderer"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.135.2",
+    "jinja2>=3.1.6",
+    "pydantic>=2.12.5",
+    "uvicorn>=0.42.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-playwright>=0.6",
+    "httpx>=0.28",
+    "pytest-asyncio>=0.25",
+    "ruff>=0.9",
+    "mypy>=1.14",
+    "pyright>=1.1",
+    "mkdocs-material>=9.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.7.2,<0.8"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+exclude = ["ig"]
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+select = ["E", "W", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_unused_ignores = true
+strict_equality = true
+mypy_path = ["src"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+useLibraryCodeForTypes = true
+reportPrivateUsage = false
+reportUnusedFunction = false
+reportUnknownMemberType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
+reportMissingTypeArgument = false
+reportMissingTypeStubs = false
+reportUnknownLambdaType = false
+reportMissingImports = "warning"
+reportMissingModuleSource = false

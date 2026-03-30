@@ -1,0 +1,133 @@
+site_name: DHIS2-FHIR Learning Guide
+site_description: A step-by-step learning project for FHIR and FSH, with a focus on DHIS2-to-FHIR mapping concepts
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+nav:
+  - Home: introduction.md
+  - FHIR Fundamentals:
+      - Introduction to FHIR: ch01-fhir-overview/index.md
+      - FHIR Resources: ch01-fhir-overview/resources.md
+      - Data Types and Formats: ch01-fhir-overview/data-types.md
+      - Patient: ch01-fhir-overview/patient.md
+      - Observation: ch01-fhir-overview/observation.md
+      - Encounter: ch01-fhir-overview/encounter.md
+      - EpisodeOfCare: ch01-fhir-overview/episodeofcare.md
+      - Organization and Location: ch01-fhir-overview/organization-location.md
+      - Bundle: ch01-fhir-overview/bundle.md
+      - Questionnaire: ch01-fhir-overview/questionnaire.md
+      - Introduction to FSH: ch02-fsh-introduction/index.md
+      - FSH Syntax Basics: ch02-fsh-introduction/syntax-basics.md
+  - Getting Started:
+      - Development Environment: ch03-dev-environment/index.md
+      - Project Structure: ch03-dev-environment/project-structure.md
+  - FSH 101:
+      - Overview: ch04-fsh-101/index.md
+      - Profiles: ch04-fsh-101/profiles.md
+      - Extensions: ch04-fsh-101/extensions.md
+      - Value Sets and Code Systems: ch04-fsh-101/valuesets-codesystems.md
+      - Instances: ch04-fsh-101/instances.md
+      - Logical Models: ch04-fsh-101/logical-models.md
+      - Mappings: ch04-fsh-101/mappings.md
+      - RuleSets: ch04-fsh-101/rulesets.md
+      - Aliases: ch04-fsh-101/aliases.md
+      - Invariants: ch04-fsh-101/invariants.md
+      - Slicing: ch04-fsh-101/slicing.md
+      - Common Mistakes: ch04-fsh-101/common-mistakes.md
+  - Exercises: exercises.md
+  - Building an IG:
+      - Building Your First IG: ch05-first-ig/index.md
+      - SUSHI Configuration: ch05-first-ig/sushi-config.md
+      - Publishing: ch05-first-ig/publishing.md
+  - DHIS2 and FHIR:
+      - Overview: ch06-dhis2-fhir/index.md
+      - DHIS2 Concepts Quick Reference: ch06-dhis2-fhir/dhis2-concepts.md
+      - Mapping Concepts: ch06-dhis2-fhir/mapping-concepts.md
+  - Measure:
+      - Overview: ch07-measure/index.md
+      - The Measure Resource: ch07-measure/measure.md
+      - The MeasureReport Resource: ch07-measure/measure-report.md
+      - DHIS2 Patterns: ch07-measure/dhis2-patterns.md
+      - FSH Examples: ch07-measure/fsh-examples.md
+  - IG Reference:
+      - Overview: ch08-ig-reference/index.md
+      - DHIS2Patient Profile: ch08-ig-reference/patient-profile.md
+      - Organization and Location Profiles: ch08-ig-reference/organization-profiles.md
+      - Clinical Profiles: ch08-ig-reference/clinical-profiles.md
+      - Questionnaire Profiles: ch08-ig-reference/questionnaire-profiles.md
+      - Measure Profiles: ch08-ig-reference/measure-profiles.md
+      - Extensions: ch08-ig-reference/extensions.md
+      - Terminology: ch08-ig-reference/terminology.md
+      - Bundle Examples: ch08-ig-reference/bundles.md
+      - Logical Models and Mappings: ch08-ig-reference/logical-models.md
+  - IPS:
+      - International Patient Summary: ch11-ips/index.md
+      - IPS Profiles: ch11-ips/profiles.md
+      - Vaccine Terminology: ch11-ips/terminology.md
+      - DHIS2 to IPS Mapping: ch11-ips/mapping.md
+      - Examples: ch11-ips/examples.md
+  - FHIR Search:
+      - FHIR REST API Search: ch12-fhir-search/index.md
+      - Search Basics: ch12-fhir-search/search-basics.md
+      - Search Parameters: ch12-fhir-search/search-parameters.md
+      - Advanced Search: ch12-fhir-search/advanced-search.md
+      - Lao PDR Registry Patterns: ch12-fhir-search/lao-registry-patterns.md
+  - CHR Service:
+      - Overview: ch13-chr-service/index.md
+      - FHIR Mapping: ch13-chr-service/fhir-mapping.md
+      - API Reference: ch13-chr-service/api-reference.md
+      - Profiles: ch13-chr-service/profiles.md
+  - Validation:
+      - Validation and Testing: ch10-validation/index.md
+  - Renderer:
+      - Local Resource Renderer: ch09-renderer/index.md
+      - Architecture: ch09-renderer/architecture.md
+      - Pydantic Models: ch09-renderer/pydantic-models.md
+  - Glossary: glossary.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+plugins:
+  - search

@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}{{ q.display_title }} — Questionnaire Renderer{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-gray-800 mb-4">{{ q.display_title }}</h1>
+
+{% if q.description %}
+<p class="text-gray-600 mb-4">{{ q.description }}</p>
+{% endif %}
+
+<div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-5">
+    <div><strong class="text-gray-700">ID:</strong> <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">{{ q.id }}</code></div>
+    <div><strong class="text-gray-700">Status:</strong> {{ q.status or 'N/A' }}</div>
+    <div><strong class="text-gray-700">URL:</strong> <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">{{ q.url or 'N/A' }}</code></div>
+    {% if q.subjectType %}
+    <div><strong class="text-gray-700">Subject:</strong>
+        {% for st in q.subjectType %}<span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">{{ st }}</span> {% endfor %}
+    </div>
+    {% else %}
+    <div><strong class="text-gray-700">Subject:</strong> <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Anonymous (Event Program)</span></div>
+    {% endif %}
+</div>
+
+{% if response %}
+<div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-md text-sm mb-5">
+    <strong>Viewing QuestionnaireResponse:</strong> <code class="bg-blue-100 px-1 rounded">{{ response.id }}</code>
+    {% if response.subject and response.subject.reference %}
+        &mdash; Subject: <a href="/patient/{{ response.subject.reference.split('/')|last }}" class="underline"><code>{{ response.subject.reference }}</code></a>
+    {% endif %}
+    {% if response.authored %} &mdash; Date: {{ response.authored }}{% endif %}
+    &mdash; Status: {{ response.status }}
+    <br>
+    <a href="/json/QuestionnaireResponse/{{ response.id }}" class="text-blue-600 text-xs underline">View JSON &rarr;</a>
+</div>
+{% endif %}
+
+{% macro render_item(item, depth) %}
+    {% set link_id = item.linkId %}
+    {% set item_type = item.type %}
+    {% set is_required = item.required %}
+    {% set answer_val = answers.get(link_id, '') if answers else '' %}
+    {% set options = resolve_options(item, valuesets, codesystems) %}
+
+    {% if item_type == 'group' %}
+        <fieldset class="border border-gray-200 rounded-lg p-4 my-4 bg-gray-50" style="margin-left: {{ (depth - 1) * 16 }}px;">
+            <legend class="px-2 text-base font-semibold text-gray-700">{{ item.text or link_id }}</legend>
+            <div class="text-xs text-gray-400 font-mono mb-2">linkId: {{ link_id }} &bull; type: group</div>
+            {% if item.item %}
+                {% for child in item.item %}
+                    {{ render_item(child, depth + 1) }}
+                {% endfor %}
+            {% endif %}
+        </fieldset>
+    {% else %}
+        <div class="border-l-3 {{ 'border-primary-500 bg-blue-50/30' if answer_val != '' else 'border-gray-200 bg-gray-50' }} pl-4 py-3 rounded-r mb-3">
+            <label class="block text-sm font-medium text-gray-600 mb-0.5">
+                {{ item.text or link_id }}
+                {% if is_required %}<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-700">required</span>{% endif %}
+            </label>
+            <div class="text-xs text-gray-400 font-mono mb-1.5">linkId: {{ link_id }} &bull; type: {{ item_type }}
+                {% if item.answerValueSet %} &bull; valueSet: <code>{{ item.answerValueSet.split('/')|last }}</code>{% endif %}
+            </div>
+
+            {% if response and answer_val != '' %}
+                {% if item_type == 'boolean' %}
+                    <div class="inline-block px-2.5 py-1 bg-green-50 text-green-700 rounded text-sm font-medium">{{ 'Yes' if answer_val else 'No' }}</div>
+                {% elif options %}
+                    {% set display = '' %}
+                    {% for opt in options %}
+                        {% if opt.code == answer_val|string %}{% set display = opt.display %}{% endif %}
+                    {% endfor %}
+                    <div class="inline-block px-2.5 py-1 bg-green-50 text-green-700 rounded text-sm font-medium">{{ display or answer_val }}</div>
+                {% else %}
+                    <div class="inline-block px-2.5 py-1 bg-green-50 text-green-700 rounded text-sm font-medium">{{ answer_val }}</div>
+                {% endif %}
+            {% else %}
+                <input type="hidden" name="text_{{ link_id }}" value="{{ item.text or link_id }}">
+                <input type="hidden" name="type_{{ link_id }}" value="{{ item_type }}">
+                {% if item_type == 'choice' or item_type == 'coding' %}
+                    <select name="answer_{{ link_id }}" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
+                        <option value="">-- Select --</option>
+                        {% for opt in options %}
+                        <option value="{{ opt.code }}" {{ 'selected' if opt.code == answer_val|string else '' }}>{{ opt.display or opt.code }}</option>
+                        {% endfor %}
+                    </select>
+                {% elif item_type == 'boolean' %}
+                    <label class="inline-flex items-center gap-1.5 text-sm"><input type="checkbox" name="answer_{{ link_id }}" value="true" {{ 'checked' if answer_val else '' }} class="accent-primary-600"> Yes</label>
+                {% elif item_type == 'integer' %}
+                    <input type="number" name="answer_{{ link_id }}" step="1" value="{{ answer_val }}" placeholder="Enter integer" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
+                {% elif item_type == 'decimal' %}
+                    <input type="number" name="answer_{{ link_id }}" step="0.01" value="{{ answer_val }}" placeholder="Enter number" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
+                {% elif item_type == 'date' %}
+                    <input type="date" name="answer_{{ link_id }}" value="{{ answer_val or today }}" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
+                {% elif item_type == 'dateTime' %}
+                    <input type="datetime-local" name="answer_{{ link_id }}" value="{{ answer_val }}" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
+                {% elif item_type == 'text' %}
+                    <textarea name="answer_{{ link_id }}" placeholder="Enter text" class="w-full max-w-lg px-3 py-2 border border-gray-300 rounded-md text-sm min-h-[60px]" {{ 'required' if is_required else '' }}>{{ answer_val }}</textarea>
+                {% elif item_type == 'time' %}
+                    <input type="time" name="answer_{{ link_id }}" value="{{ answer_val }}" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
+                {% elif item_type == 'url' %}
+                    <input type="url" name="answer_{{ link_id }}" value="{{ answer_val }}" placeholder="https://..." class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
+                {% else %}
+                    <input type="text" name="answer_{{ link_id }}" value="{{ answer_val }}" placeholder="{{ item_type }}" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
+                {% endif %}
+            {% endif %}
+
+            {% if item.enableWhen %}
+            <div class="text-[11px] text-gray-400 mt-1">
+                Conditional: shown when
+                {% for ew in item.enableWhen %}
+                    <code class="bg-gray-100 px-1 rounded">{{ ew.question }}</code> {{ ew.operator }}
+                    {% if ew.answerCoding %}<code class="bg-gray-100 px-1 rounded">{{ ew.answerCoding.code }}</code>{% endif %}
+                    {% if ew.answerBoolean is not none %}<code class="bg-gray-100 px-1 rounded">{{ ew.answerBoolean }}</code>{% endif %}
+                    {% if ew.answerString %}<code class="bg-gray-100 px-1 rounded">{{ ew.answerString }}</code>{% endif %}
+                    {% if not loop.last %} and {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endmacro %}
+
+<div class="bg-white rounded-lg shadow-sm p-6 mb-5">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">Form Fields</h2>
+    <form {% if patient is defined and patient %}method="post" action="/form/save"{% else %}onsubmit="return false;"{% endif %}>
+        {% if patient is defined and patient %}
+        <input type="hidden" name="patient_id" value="{{ patient.id }}">
+        <input type="hidden" name="questionnaire_url" value="{{ q.url }}">
+        <input type="hidden" name="questionnaire_id" value="{{ q.id }}">
+        <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-md text-sm mb-5">
+            Filling for: <strong><a href="/patient/{{ patient.id }}" class="underline">{{ patient.display_name }}</a></strong>
+        </div>
+        {% endif %}
+        {% for item in q.item %}
+            {{ render_item(item, 1) }}
+        {% endfor %}
+        {% if patient is defined and patient %}
+        <div class="pt-4 border-t border-gray-200 flex gap-2 mt-4">
+            <button type="submit" class="btn-primary">Submit Response</button>
+            <a href="/patient/{{ patient.id }}" class="btn-secondary">Cancel</a>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+{% if related_responses %}
+<div class="bg-white rounded-lg shadow-sm p-6 mb-5">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">Submitted Responses ({{ related_responses|length }})</h2>
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-gray-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Response ID</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Subject</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Date</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Status</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in related_responses %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-2.5 px-3"><code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">{{ r.id }}</code></td>
+                <td class="py-2.5 px-3">
+                    {% if r.subject and r.subject.reference %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">{{ r.subject.reference }}</span>
+                    {% else %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Anonymous</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 text-gray-600">{{ r.authored or 'N/A' }}</td>
+                <td class="py-2.5 px-3 text-gray-600">{{ r.status or 'N/A' }}</td>
+                <td class="py-2.5 px-3 space-x-1">
+                    <a href="/response/{{ r.id }}" class="btn-primary btn-sm">View Form</a>
+                    <a href="/json/QuestionnaireResponse/{{ r.id }}" class="btn-secondary btn-sm">JSON</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="flex gap-2 mt-5">
+    <a href="/json/Questionnaire/{{ q.id }}" class="btn-secondary">View Questionnaire JSON</a>
+    <a href="/" class="btn-secondary">Back to list</a>
+</div>
+{% endblock %}

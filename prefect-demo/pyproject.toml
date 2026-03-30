@@ -1,0 +1,85 @@
+[project]
+name = "prefect-demo"
+version = "0.1.0"
+description = "Minimal Prefect 3 demo for the Vietnam workshop"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "prefect>=3.6",
+    "prefect-dhis2",
+    "python-dotenv",
+]
+
+[tool.uv.sources]
+prefect-dhis2 = { workspace = true }
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pyright>=1.1.408",
+    "ruff>=0.15.7",
+]
+
+# ---------- Ruff ----------
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+select = ["E", "W", "F", "I", "D"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D"]
+"**/__init__.py" = ["D104"]
+"packages/**/*.py" = ["D105", "D107"]
+"deployments/**/*.py" = ["D105", "D107"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+# ---------- mypy ----------
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_unused_ignores = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ["prefect.*", "httpx.*", "prefect_dhis2.*", "dhis2_client", "dhis2_client.*"]
+ignore_missing_imports = true
+follow_untyped_imports = true
+
+# ---------- Pyright ----------
+[tool.pyright]
+include = ["deployments", "packages"]
+exclude = ["**/.venv"]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+useLibraryCodeForTypes = true
+reportPrivateUsage = false
+reportUnusedFunction = false
+reportUnknownMemberType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
+reportMissingTypeArgument = false
+reportMissingTypeStubs = false
+reportUnknownLambdaType = false
+reportMissingImports = "warning"
+reportMissingModuleSource = false

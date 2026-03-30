@@ -1,0 +1,511 @@
+{
+  "info": {
+    "name": "DHIS2-FHIR API",
+    "description": "FHIR REST API for the DHIS2-FHIR Learning IG.\n\nCovers CHR (Community Health Registry) workflows, Questionnaire/Report access, and IPS (International Patient Summary) extraction.\n\nSet the `base_url` variable to your running server (default: http://localhost:8000).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "CHR — Patient & Immunization",
+      "description": "Community Health Registry CRUD operations for Patient and Immunization resources.",
+      "item": [
+        {
+          "name": "Metadata — CapabilityStatement",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/metadata",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "metadata"]
+            },
+            "description": "Retrieve the server CapabilityStatement describing supported resources and interactions."
+          }
+        },
+        {
+          "name": "Patient — Search all",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient?_count=10",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient"],
+              "query": [
+                { "key": "_count", "value": "10" }
+              ]
+            },
+            "description": "List all patients (paginated)."
+          }
+        },
+        {
+          "name": "Patient — Search by name",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient?name=Khamla&_count=10",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient"],
+              "query": [
+                { "key": "name", "value": "Khamla" },
+                { "key": "_count", "value": "10" }
+              ]
+            },
+            "description": "Search patients by display name (substring match)."
+          }
+        },
+        {
+          "name": "Patient — Search by identifier (clientHealthId)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient?identifier=http://moh.gov.la/fhir/id/client-health-id|",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient"],
+              "query": [
+                { "key": "identifier", "value": "http://moh.gov.la/fhir/id/client-health-id|", "description": "Append the clientHealthId value after the pipe" }
+              ]
+            },
+            "description": "Search CHR patients by clientHealthId using system|value format."
+          }
+        },
+        {
+          "name": "Patient — Search by identifier (national ID)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient?identifier=http://moh.gov.la/fhir/id/green-national-id|LA-1998-41270",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient"],
+              "query": [
+                { "key": "identifier", "value": "http://moh.gov.la/fhir/id/green-national-id|LA-1998-41270" }
+              ]
+            },
+            "description": "Search by Lao national ID (green card)."
+          }
+        },
+        {
+          "name": "Patient — Search by gender + address",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient?gender=female&address-state=Savannakhet&_count=20",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient"],
+              "query": [
+                { "key": "gender", "value": "female" },
+                { "key": "address-state", "value": "Savannakhet" },
+                { "key": "_count", "value": "20" }
+              ]
+            },
+            "description": "Combine gender and address-state filters."
+          }
+        },
+        {
+          "name": "Patient — Search by phone",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient?phone=856",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient"],
+              "query": [
+                { "key": "phone", "value": "856", "description": "Digits-only comparison — matches +856-20-xxxxxxx" }
+              ]
+            },
+            "description": "Search by phone number (digit substring match)."
+          }
+        },
+        {
+          "name": "Patient — Read by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient/seed-patient-101",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient", "seed-patient-101"]
+            },
+            "description": "Read a single CHR patient by resource ID."
+          }
+        },
+        {
+          "name": "Patient — Create (CHR with Lao identifiers)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/fhir+json" },
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resourceType\": \"Patient\",\n  \"meta\": {\n    \"profile\": [\"http://dhis2.org/fhir/learning/StructureDefinition/dhis2-chr-patient\"]\n  },\n  \"identifier\": [\n    {\n      \"system\": \"http://dhis2.org/fhir/id/tracked-entity\",\n      \"value\": \"NEW_UID_001\",\n      \"type\": {\n        \"coding\": [{\n          \"system\": \"http://terminology.hl7.org/CodeSystem/v2-0203\",\n          \"code\": \"RI\",\n          \"display\": \"Resource identifier\"\n        }]\n      }\n    },\n    {\n      \"system\": \"http://moh.gov.la/fhir/id/green-national-id\",\n      \"value\": \"LA-2000-12345\",\n      \"type\": {\n        \"coding\": [{\n          \"system\": \"http://terminology.hl7.org/CodeSystem/v2-0203\",\n          \"code\": \"NI\",\n          \"display\": \"National identifier\"\n        }]\n      }\n    }\n  ],\n  \"name\": [{\n    \"use\": \"official\",\n    \"family\": \"Phommasan\",\n    \"given\": [\"Somchai\"]\n  }],\n  \"gender\": \"male\",\n  \"birthDate\": \"2000-06-15\",\n  \"active\": true,\n  \"address\": [{\n    \"use\": \"home\",\n    \"city\": \"Anou\",\n    \"district\": \"Chanthabuly\",\n    \"state\": \"Vientiane Capital\",\n    \"country\": \"Lao PDR\"\n  }],\n  \"telecom\": [{\n    \"system\": \"phone\",\n    \"value\": \"+856-20-5551234\",\n    \"use\": \"mobile\"\n  }]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient"]
+            },
+            "description": "Create a new CHR patient with Lao identifiers. A clientHealthId is auto-generated if not provided."
+          }
+        },
+        {
+          "name": "Patient — Conditional create (If-None-Exist)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/fhir+json" },
+              { "key": "Accept", "value": "application/fhir+json" },
+              { "key": "If-None-Exist", "value": "identifier=http://moh.gov.la/fhir/id/green-national-id|LA-2000-12345" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resourceType\": \"Patient\",\n  \"name\": [{\n    \"use\": \"official\",\n    \"family\": \"Phommasan\",\n    \"given\": [\"Somchai\"]\n  }],\n  \"gender\": \"male\",\n  \"birthDate\": \"2000-06-15\",\n  \"identifier\": [{\n    \"system\": \"http://moh.gov.la/fhir/id/green-national-id\",\n    \"value\": \"LA-2000-12345\",\n    \"type\": {\n      \"coding\": [{\n        \"system\": \"http://terminology.hl7.org/CodeSystem/v2-0203\",\n        \"code\": \"NI\",\n        \"display\": \"National identifier\"\n      }]\n    }\n  }]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient"]
+            },
+            "description": "Conditional create — only creates if no existing patient matches the If-None-Exist search. Returns 200 if one match found, 412 if multiple."
+          }
+        },
+        {
+          "name": "Patient — Update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/fhir+json" },
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resourceType\": \"Patient\",\n  \"id\": \"seed-patient-101\",\n  \"name\": [{\n    \"use\": \"official\",\n    \"family\": \"Vongsa\",\n    \"given\": [\"Khamla\", \"Updated\"]\n  }],\n  \"gender\": \"female\",\n  \"birthDate\": \"1998-07-20\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fhir/Patient/seed-patient-101",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Patient", "seed-patient-101"]
+            },
+            "description": "Update an existing patient by ID. Overwrites the stored resource."
+          }
+        },
+        {
+          "name": "Immunization — Search by patient",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Immunization?patient=seed-patient-101",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Immunization"],
+              "query": [
+                { "key": "patient", "value": "seed-patient-101" }
+              ]
+            },
+            "description": "List all immunizations for a specific patient. Accepts 'Patient/id' or just 'id'."
+          }
+        },
+        {
+          "name": "Immunization — Read by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Immunization/imm-seed-patient-101-01",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Immunization", "imm-seed-patient-101-01"]
+            },
+            "description": "Read a single immunization record by ID."
+          }
+        },
+        {
+          "name": "Immunization — Create (EPI vaccine)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/fhir+json" },
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resourceType\": \"Immunization\",\n  \"status\": \"completed\",\n  \"vaccineCode\": {\n    \"coding\": [{\n      \"system\": \"http://hl7.org/fhir/sid/cvx\",\n      \"code\": \"19\",\n      \"display\": \"BCG\"\n    }]\n  },\n  \"patient\": {\n    \"reference\": \"Patient/seed-patient-101\",\n    \"display\": \"Khamla Vongsa\"\n  },\n  \"occurrenceDateTime\": \"2025-01-15\",\n  \"lotNumber\": \"BCG-2025-B123\",\n  \"protocolApplied\": [{\n    \"doseNumberPositiveInt\": 1,\n    \"targetDisease\": [{\n      \"coding\": [{\n        \"system\": \"http://snomed.info/sct\",\n        \"code\": \"56717001\",\n        \"display\": \"Tuberculosis\"\n      }]\n    }]\n  }],\n  \"extension\": [{\n    \"url\": \"http://moh.gov.la/fhir/StructureDefinition/chr-place-of-vaccination\",\n    \"valueCode\": \"facility\"\n  }]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fhir/Immunization",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Immunization"]
+            },
+            "description": "Create a new immunization record (BCG vaccine from Lao EPI schedule)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Questionnaire & QuestionnaireResponse",
+      "description": "Access Questionnaire form definitions and submitted QuestionnaireResponse events.",
+      "item": [
+        {
+          "name": "Questionnaire — List all",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Questionnaire",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Questionnaire"]
+            },
+            "description": "List all available Questionnaire form definitions."
+          }
+        },
+        {
+          "name": "Questionnaire — Search by title",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Questionnaire?title=ANC",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Questionnaire"],
+              "query": [
+                { "key": "title", "value": "ANC" }
+              ]
+            },
+            "description": "Search questionnaires by title (substring match)."
+          }
+        },
+        {
+          "name": "Questionnaire — Read ANC Visit",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Questionnaire/QuestionnaireLaoANCVisit",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Questionnaire", "QuestionnaireLaoANCVisit"]
+            },
+            "description": "Read the Lao ANC Visit questionnaire definition."
+          }
+        },
+        {
+          "name": "Questionnaire — Read Delivery",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Questionnaire/QuestionnaireDelivery",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Questionnaire", "QuestionnaireDelivery"]
+            },
+            "description": "Read the Delivery questionnaire definition."
+          }
+        },
+        {
+          "name": "Questionnaire — Read Child Immunization",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Questionnaire/QuestionnaireChildImmunization",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Questionnaire", "QuestionnaireChildImmunization"]
+            },
+            "description": "Read the Child Immunization questionnaire definition."
+          }
+        },
+        {
+          "name": "QuestionnaireResponse — List all",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/QuestionnaireResponse",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "QuestionnaireResponse"]
+            },
+            "description": "List all submitted QuestionnaireResponse events."
+          }
+        },
+        {
+          "name": "QuestionnaireResponse — Search by questionnaire",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/QuestionnaireResponse?questionnaire=ANCVisit",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "QuestionnaireResponse"],
+              "query": [
+                { "key": "questionnaire", "value": "ANCVisit", "description": "Substring match on the questionnaire reference URL" }
+              ]
+            },
+            "description": "Search responses linked to a specific questionnaire."
+          }
+        },
+        {
+          "name": "QuestionnaireResponse — Search by subject",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/QuestionnaireResponse?subject=PatientJaneDoe",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "QuestionnaireResponse"],
+              "query": [
+                { "key": "subject", "value": "PatientJaneDoe" }
+              ]
+            },
+            "description": "Search responses for a specific patient."
+          }
+        },
+        {
+          "name": "QuestionnaireResponse — Read specific response",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/QuestionnaireResponse/QRLaoANCVisit1",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "QuestionnaireResponse", "QRLaoANCVisit1"]
+            },
+            "description": "Read a single submitted QuestionnaireResponse."
+          }
+        }
+      ]
+    },
+    {
+      "name": "IPS — International Patient Summary",
+      "description": "Extract and browse IPS document Bundles. Each IPS Bundle contains a Composition, Patient demographics, and Immunization records.",
+      "item": [
+        {
+          "name": "IPS — List all document bundles",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Bundle?type=document",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Bundle"],
+              "query": [
+                { "key": "type", "value": "document", "description": "Filter to IPS document bundles only" }
+              ]
+            },
+            "description": "List all IPS document Bundles. Each contains a Composition referencing Patient and Immunization resources."
+          }
+        },
+        {
+          "name": "IPS — List all bundles (including transaction)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Bundle",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Bundle"]
+            },
+            "description": "List all Bundle resources (document, transaction, etc.)."
+          }
+        },
+        {
+          "name": "IPS — Read bundle (patient 001)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Bundle/ips-bundle-001",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Bundle", "ips-bundle-001"]
+            },
+            "description": "Read a complete IPS Bundle. The response includes the Composition, Patient, and all Immunization entries inline."
+          }
+        },
+        {
+          "name": "IPS — Read bundle (patient 002)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Bundle/ips-bundle-002",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Bundle", "ips-bundle-002"]
+            },
+            "description": "Read another IPS Bundle for a different patient."
+          }
+        },
+        {
+          "name": "IPS — Read transaction bundle (ANC Visit)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/fhir+json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fhir/Bundle/BundleANCVisitTransaction",
+              "host": ["{{base_url}}"],
+              "path": ["fhir", "Bundle", "BundleANCVisitTransaction"]
+            },
+            "description": "Read a FHIR transaction Bundle showing how an ANC visit is submitted as a batch."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block title %}Patients — Search{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Patients</h1>
+    <a href="/patient/new/create" class="btn-primary">+ New Patient</a>
+</div>
+
+<!-- Search Card -->
+<div class="bg-white rounded-lg shadow-sm p-6 mb-5">
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 mb-4">
+        <button type="button" class="search-tab px-5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors
+            {% if search_mode != 'identifier' and search_mode != 'attributes' %}text-primary-600 border-primary-600{% else %}text-gray-500 border-transparent hover:text-gray-700{% endif %}"
+            onclick="switchTab('quick', this)">Quick Search</button>
+        <button type="button" class="search-tab px-5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors
+            {% if search_mode == 'identifier' %}text-primary-600 border-primary-600{% else %}text-gray-500 border-transparent hover:text-gray-700{% endif %}"
+            onclick="switchTab('identifier', this)">Search by Identifier</button>
+        <button type="button" class="search-tab px-5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors
+            {% if search_mode == 'attributes' %}text-primary-600 border-primary-600{% else %}text-gray-500 border-transparent hover:text-gray-700{% endif %}"
+            onclick="switchTab('attributes', this)">Search by Attributes</button>
+    </div>
+
+    <!-- Tab 1: Quick Search -->
+    <form method="get" action="/patients" class="search-panel"
+          id="tab-quick" {% if search_mode == 'identifier' or search_mode == 'attributes' %}style="display:none"{% endif %}>
+        <input type="hidden" name="search_mode" value="">
+        <div class="flex gap-3 items-center flex-wrap">
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="q" value="{{ query }}"
+                       placeholder="Search patients..."
+                       class="w-full px-3.5 py-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                       autofocus>
+            </div>
+            <select name="gender" class="px-3 py-2.5 border border-gray-300 rounded-md text-sm min-w-[140px] focus:ring-2 focus:ring-primary-500 outline-none">
+                <option value="">All genders</option>
+                <option value="female" {% if gender == 'female' %}selected{% endif %}>Female</option>
+                <option value="male" {% if gender == 'male' %}selected{% endif %}>Male</option>
+                <option value="other" {% if gender == 'other' %}selected{% endif %}>Other</option>
+            </select>
+            <select name="country" class="px-3 py-2.5 border border-gray-300 rounded-md text-sm min-w-[140px] focus:ring-2 focus:ring-primary-500 outline-none">
+                <option value="">All countries</option>
+                {% for c in countries %}
+                <option value="{{ c }}" {% if country == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-primary">Search</button>
+            {% if query or gender or country %}
+            <a href="/patients" class="btn-secondary">Clear</a>
+            {% endif %}
+        </div>
+        <p class="text-xs text-gray-400 mt-2">Searches across name, identifier, city, district, and country. Use the Identifier or Attributes tabs for precise FHIR search.</p>
+    </form>
+
+    <!-- Tab 2: Identifier -->
+    <form method="get" action="/patients" class="search-panel"
+          id="tab-identifier" {% if search_mode != 'identifier' %}style="display:none"{% endif %}>
+        <input type="hidden" name="search_mode" value="identifier">
+        <div class="flex gap-3 items-center flex-wrap">
+            <select name="id_type" required class="px-3 py-2.5 border border-gray-300 rounded-md text-sm min-w-[180px] focus:ring-2 focus:ring-primary-500 outline-none">
+                <option value="RI" {% if id_type == 'RI' or not id_type %}selected{% endif %}>DHIS2</option>
+                <option value="NI" {% if id_type == 'NI' %}selected{% endif %}>National ID</option>
+                <option value="CHR" {% if id_type == 'CHR' %}selected{% endif %}>CHR</option>
+                <option value="CVID" {% if id_type == 'CVID' %}selected{% endif %}>CVID</option>
+                <option value="INS" {% if id_type == 'INS' %}selected{% endif %}>Insurance</option>
+                <option value="GREENCARD" {% if id_type == 'GREENCARD' %}selected{% endif %}>Green Card</option>
+                <option value="PPN" {% if id_type == 'PPN' %}selected{% endif %}>Passport</option>
+                <option value="FAMILYBOOK" {% if id_type == 'FAMILYBOOK' %}selected{% endif %}>Family Book</option>
+            </select>
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="id_value" value="{{ id_value }}" required
+                       placeholder="Enter identifier value..."
+                       class="w-full px-3.5 py-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none">
+            </div>
+            <button type="submit" class="btn-primary">Search</button>
+            {% if id_type or id_value %}
+            <a href="/patients?search_mode=identifier" class="btn-secondary">Clear</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- Tab 3: Attributes -->
+    <form method="get" action="/patients" class="search-panel"
+          id="tab-attributes" {% if search_mode != 'attributes' %}style="display:none"{% endif %}>
+        <input type="hidden" name="search_mode" value="attributes">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">First name</label>
+                <input type="text" name="firstname" value="{{ firstname }}" placeholder="Given name..."
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Last name</label>
+                <input type="text" name="lastname" value="{{ lastname }}" placeholder="Family name..."
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Date of birth</label>
+                <input type="date" name="dob" value="{{ dob }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Sex</label>
+                <select name="sex" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none">
+                    <option value="">Any</option>
+                    <option value="female" {% if sex == 'female' %}selected{% endif %}>Female</option>
+                    <option value="male" {% if sex == 'male' %}selected{% endif %}>Male</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">District</label>
+                <select name="district" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none">
+                    <option value="">Any district</option>
+                    {% for d in districts %}
+                    <option value="{{ d }}" {% if district == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Phone</label>
+                <input type="text" name="phone" value="{{ phone }}" placeholder="Phone number..."
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none">
+            </div>
+        </div>
+        <div class="flex gap-3 items-center mt-3">
+            <button type="submit" class="btn-primary">Search</button>
+            {% if firstname or lastname or dob or sex or district or phone %}
+            <a href="/patients?search_mode=attributes" class="btn-secondary">Clear</a>
+            {% endif %}
+            <span class="text-xs text-gray-400">Combine fields to narrow results (AND logic)</span>
+        </div>
+    </form>
+</div>
+
+<!-- FHIR URL (live-updated) -->
+<div class="bg-gray-50 border-l-4 border-primary-500 rounded-r-lg px-5 py-3 mb-5">
+    <div class="text-xs font-semibold text-gray-500 mb-1">FHIR Search URL</div>
+    <code class="text-sm text-gray-700 break-all" id="fhir-url">GET [base]/Patient</code>
+</div>
+
+<!-- Results -->
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="flex justify-between items-center pb-3 mb-3 border-b border-gray-100 text-sm text-gray-500">
+        <span>{{ total }} patient{{ 's' if total != 1 else '' }} found</span>
+        {% if total_pages > 1 %}
+        <span class="font-semibold">Page {{ page }} of {{ total_pages }}</span>
+        {% endif %}
+    </div>
+
+    {% if patients %}
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-gray-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Name</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Gender</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Date of Birth</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Location</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Identifier</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Phone</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-gray-600 bg-gray-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in patients %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-2.5 px-3">
+                    <a href="/patient/{{ p.id }}" class="text-primary-600 font-medium hover:underline">{{ p.display_name }}</a>
+                    {% if not p.active %}
+                    <span class="ml-1 inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-stone-100 text-stone-600">Inactive</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3">
+                    {% if p.gender == 'female' %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-pink-50 text-pink-700">F</span>
+                    {% elif p.gender == 'male' %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">M</span>
+                    {% else %}
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">{{ p.gender }}</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 text-gray-600 whitespace-nowrap">{{ p.birthDate or 'N/A' }}</td>
+                <td class="py-2.5 px-3 text-gray-600">
+                    {% if p.address %}
+                        {{ p.address[0].city }}{% if p.address[0].district %}/{{ p.address[0].district }}{% endif %}{% if p.address[0].country %}, {{ p.address[0].country }}{% endif %}
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 whitespace-nowrap">
+                    {% set ids = p.identifier_display() %}
+                    {% if ids %}
+                    <span class="text-[10px] text-gray-400 mr-1">{{ ids[0].type }}</span><code class="text-[11px] bg-gray-100 px-1.5 py-0.5 rounded">{{ ids[0].value }}</code>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 text-xs text-gray-600 whitespace-nowrap">
+                    {% if p.phone_numbers %}{{ p.phone_numbers[0] }}{% endif %}
+                </td>
+                <td class="py-2.5 px-3">
+                    <a href="/patient/{{ p.id }}" class="btn-secondary btn-sm">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if total_pages > 1 %}
+    <div class="flex gap-1.5 items-center justify-center pt-4 mt-3 border-t border-gray-100">
+        {% set base_params %}search_mode={{ search_mode }}&q={{ query }}&gender={{ gender }}&country={{ country }}&id_type={{ id_type }}&id_value={{ id_value }}&firstname={{ firstname }}&lastname={{ lastname }}&dob={{ dob }}&sex={{ sex }}&district={{ district }}&phone={{ phone }}{% endset %}
+        {% if page > 1 %}
+        <a href="/patients?{{ base_params }}&page={{ page - 1 }}" class="btn-secondary btn-sm">&laquo; Prev</a>
+        {% endif %}
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <span class="inline-block px-3 py-1.5 bg-primary-600 text-white rounded text-xs font-semibold">{{ p }}</span>
+            {% elif p <= 3 or p > total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+                <a href="/patients?{{ base_params }}&page={{ p }}" class="inline-block px-3 py-1.5 text-primary-600 rounded text-xs hover:bg-primary-50">{{ p }}</a>
+            {% elif p == 4 or p == total_pages - 2 %}
+                <span class="text-gray-400 px-1">...</span>
+            {% endif %}
+        {% endfor %}
+        {% if page < total_pages %}
+        <a href="/patients?{{ base_params }}&page={{ page + 1 }}" class="btn-secondary btn-sm">Next &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p class="text-gray-400 italic py-5">
+        {% if search_mode == 'identifier' and not id_type %}
+        Select an identifier type and enter a value to search.
+        {% elif search_mode == 'attributes' and not firstname and not lastname and not dob and not sex and not district and not phone %}
+        Fill in one or more fields to search by attributes.
+        {% else %}
+        No patients match your search.
+        {% if search_mode %}
+        <a href="/patients?search_mode={{ search_mode }}" class="text-primary-600 hover:underline">Clear filters</a>
+        {% else %}
+        <a href="/patients" class="text-primary-600 hover:underline">Clear filters</a>
+        {% endif %}
+        to see all patients.
+        {% endif %}
+    </p>
+    {% endif %}
+</div>
+
+<script>
+var activeMode = '{{ search_mode or "quick" }}';
+
+function switchTab(mode, btn) {
+    activeMode = mode;
+    document.querySelectorAll('.search-panel').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.search-tab').forEach(el => {
+        el.classList.remove('text-primary-600', 'border-primary-600');
+        el.classList.add('text-gray-500', 'border-transparent');
+    });
+    document.getElementById('tab-' + mode).style.display = '';
+    btn.classList.remove('text-gray-500', 'border-transparent');
+    btn.classList.add('text-primary-600', 'border-primary-600');
+    updateFhirUrl();
+}
+
+var idSystems = {
+    RI: 'http://dhis2.org/fhir/id/tracked-entity',
+    NI: 'http://example.org/national-id',
+    CHR: 'http://moh.gov.la/fhir/id/chr',
+    CVID: 'http://moh.gov.la/fhir/id/cvid',
+    INS: 'http://moh.gov.la/fhir/id/insurance',
+    GREENCARD: 'http://moh.gov.la/fhir/id/green-national-id',
+    PPN: 'http://example.org/passport',
+    FAMILYBOOK: 'http://moh.gov.la/fhir/id/family-book'
+};
+
+function updateFhirUrl() {
+    var params = [];
+    if (activeMode === 'identifier') {
+        var idType = document.querySelector('#tab-identifier select[name="id_type"]').value;
+        var idValue = document.querySelector('#tab-identifier input[name="id_value"]').value;
+        if (idType && idValue) params.push('identifier=' + (idSystems[idType] || '') + '|' + idValue);
+    } else if (activeMode === 'attributes') {
+        var fields = {firstname: 'given', lastname: 'family', dob: 'birthdate', sex: 'gender', district: 'address', phone: 'phone'};
+        for (var name in fields) {
+            var el = document.querySelector('#tab-attributes [name="' + name + '"]');
+            if (el && el.value) params.push(fields[name] + '=' + el.value);
+        }
+    } else {
+        var g = document.querySelector('#tab-quick select[name="gender"]');
+        var c = document.querySelector('#tab-quick select[name="country"]');
+        if (g && g.value) params.push('gender=' + g.value);
+        if (c && c.value) params.push('address-country=' + c.value);
+    }
+    var url = 'GET [base]/Patient' + (params.length ? '?' + params.join('&') : '');
+    document.getElementById('fhir-url').textContent = url;
+}
+
+document.querySelectorAll('.search-panel input, .search-panel select').forEach(function(el) {
+    el.addEventListener('input', updateFhirUrl);
+    el.addEventListener('change', updateFhirUrl);
+});
+updateFhirUrl();
+</script>
+{% endblock %}
