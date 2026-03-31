@@ -7,7 +7,7 @@
   "dependencies": {
     "@slidev/cli": "^52",
     "@slidev/theme-default": "latest",
-    "mermaid": "^11.13.0"
+    "mermaid": "^10"
   },
   "devDependencies": {
     "playwright-chromium": "^1.58.2"
