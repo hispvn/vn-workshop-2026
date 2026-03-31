@@ -91,6 +91,8 @@ Usage: #example
 * address[0].city = "Anou"
 * address[0].state = "Vientiane Capital"
 * address[0].country = "LA"
+* extension[ethnicity].valueCodeableConcept
+    = ChrEthnicityCS#lao "Lao"
 ```
 
 Examples are included in the IG and used for validation testing.
