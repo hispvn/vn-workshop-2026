@@ -13,7 +13,7 @@ layout: section
 <v-clicks>
 
 - **REST + JSON** — same web standards as modern APIs
-- **Resource-based** — everything is a Resource (Patient, Immunization, Questionnaire...)
+- **Resource-based** — everything is a Resource (Patient, Questionnaire, Organization...)
 - **Profiling** — constrain base resources for your country/program
 - **Open** — free specification, large ecosystem, no licensing
 
@@ -87,7 +87,7 @@ Submitted form data (events)
 
 <div class="border rounded p-3 bg-green-50">
 
-**Immunization**
+**Immunization** *(IPS only)*
 Vaccine, date, dose, target disease
 
 </div>

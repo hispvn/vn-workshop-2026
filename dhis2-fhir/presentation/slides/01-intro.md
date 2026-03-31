@@ -15,7 +15,7 @@ Profiles, extensions, terminology using FSH
 The pipeline from DHIS2 metadata to a FHIR API
 
 ### 5. FHIR for EIR in Lao PDR (~15 min)
-CHR patients, immunizations, IPS, live demo
+CHR patients, organizations, IPS documents, live demo
 
 </v-clicks>
 

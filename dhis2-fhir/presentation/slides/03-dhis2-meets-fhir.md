@@ -12,7 +12,7 @@ FHIR is the **common language** between systems. DHIS2 is one of many.
 
 ```mermaid
 flowchart LR
-    DHIS2["<b>DHIS2</b><br/>Patient registry<br/>Program data<br/>Org units"] <-->|"FHIR API"| FHIR["<b>FHIR</b><br/>Patient<br/>Immunization<br/>Questionnaire"]
+    DHIS2["<b>DHIS2</b><br/>Patient registry<br/>Program data<br/>Org units"] <-->|"FHIR API"| FHIR["<b>FHIR</b><br/>Patient<br/>Questionnaire<br/>Organization"]
     FHIR <--> LAB["Lab systems"]
     FHIR <--> SHR["Shared Health<br/>Record"]
     FHIR <-->|"IPS"| OTHER["Other countries"]

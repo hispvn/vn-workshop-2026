@@ -36,7 +36,7 @@ Each has `instructions.md`, `starter.fsh`, and `solution.fsh`. Compile with `mak
 - **DHIS2 ↔ FHIR mapping** — why Questionnaire, how linkId works
 - **Profiles & terminology** — constraining resources, extensions, ValueSets
 - **The pipeline** — DHIS2 metadata → FSH → SUSHI → FHIR API
-- **Lao EIR** — CHR patients, immunizations, IPS cross-border
+- **Lao EIR** — CHR patients, organizations, IPS cross-border
 
 </v-clicks>
 
