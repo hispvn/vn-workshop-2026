@@ -168,7 +168,7 @@
 <div class="bg-white rounded-lg shadow-sm p-6 mb-5">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-semibold text-gray-700">Form Submissions ({{ responses|length }})</h2>
-        <a href="/forms" class="btn-primary btn-sm">+ Fill Form</a>
+        <a href="/forms?patient={{ patient.id }}" class="btn-primary btn-sm">+ Fill Form</a>
     </div>
     {% if responses %}
     <p class="text-sm text-gray-500 mb-3">QuestionnaireResponses linked to this patient.</p>
