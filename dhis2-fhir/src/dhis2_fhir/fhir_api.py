@@ -146,6 +146,32 @@ async def metadata() -> JSONResponse:
                             "type": "Immunization",
                             "interaction": [{"code": "read"}, {"code": "search-type"}, {"code": "create"}],
                         },
+                        {
+                            "type": "Questionnaire",
+                            "interaction": [{"code": "read"}, {"code": "search-type"}],
+                        },
+                        {
+                            "type": "QuestionnaireResponse",
+                            "interaction": [{"code": "read"}, {"code": "search-type"}],
+                        },
+                        {
+                            "type": "ValueSet",
+                            "interaction": [{"code": "read"}, {"code": "search-type"}],
+                            "operation": [
+                                {
+                                    "name": "expand",
+                                    "definition": "http://hl7.org/fhir/OperationDefinition/ValueSet-expand",
+                                }
+                            ],
+                        },
+                        {
+                            "type": "CodeSystem",
+                            "interaction": [{"code": "read"}, {"code": "search-type"}],
+                        },
+                        {
+                            "type": "Bundle",
+                            "interaction": [{"code": "read"}, {"code": "search-type"}],
+                        },
                     ],
                 }
             ],

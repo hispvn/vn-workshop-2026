@@ -12,9 +12,9 @@ InstanceOf: CapabilityStatement
 Usage: #definition
 Title: "CHR FHIR Server Capability Statement"
 Description: """
-CapabilityStatement for the Community Health Record (CHR) FHIR server.
-Supports Patient and Immunization resources with search, read, and
-conditional create operations.
+CapabilityStatement for the DHIS2-FHIR learning server.
+Supports Patient, Immunization, Questionnaire, QuestionnaireResponse,
+ValueSet (with $expand), CodeSystem, and Bundle resources.
 """
 
 * status = #active
@@ -26,7 +26,7 @@ conditional create operations.
 * implementation.url = "http://localhost:8000/fhir"
 
 * rest[0].mode = #server
-* rest[0].documentation = "CHR FHIR server supporting Patient and Immunization resources"
+* rest[0].documentation = "DHIS2-FHIR learning server supporting Patient, Questionnaire, ValueSet, CodeSystem, and more"
 
 // -- Patient resource -------------------------------------------------------
 * rest[0].resource[0].type = #Patient
@@ -87,3 +87,75 @@ conditional create operations.
 * rest[0].resource[=].searchParam[0].name = "patient"
 * rest[0].resource[=].searchParam[0].type = #reference
 * rest[0].resource[=].searchParam[0].documentation = "Search immunizations by patient reference"
+
+// -- Questionnaire resource ---------------------------------------------------
+* rest[0].resource[+].type = #Questionnaire
+* rest[0].resource[=].interaction[0].code = #read
+* rest[0].resource[=].interaction[+].code = #search-type
+
+* rest[0].resource[=].searchParam[0].name = "name"
+* rest[0].resource[=].searchParam[0].type = #string
+* rest[0].resource[=].searchParam[0].documentation = "Search by questionnaire name"
+
+* rest[0].resource[=].searchParam[+].name = "title"
+* rest[0].resource[=].searchParam[=].type = #string
+* rest[0].resource[=].searchParam[=].documentation = "Search by questionnaire title"
+
+* rest[0].resource[=].searchParam[+].name = "status"
+* rest[0].resource[=].searchParam[=].type = #token
+* rest[0].resource[=].searchParam[=].documentation = "Filter by status (active | draft | retired)"
+
+// -- QuestionnaireResponse resource -------------------------------------------
+* rest[0].resource[+].type = #QuestionnaireResponse
+* rest[0].resource[=].interaction[0].code = #read
+* rest[0].resource[=].interaction[+].code = #search-type
+
+* rest[0].resource[=].searchParam[0].name = "questionnaire"
+* rest[0].resource[=].searchParam[0].type = #reference
+* rest[0].resource[=].searchParam[0].documentation = "Search by questionnaire URL"
+
+* rest[0].resource[=].searchParam[+].name = "subject"
+* rest[0].resource[=].searchParam[=].type = #reference
+* rest[0].resource[=].searchParam[=].documentation = "Search by subject (Patient reference)"
+
+* rest[0].resource[=].searchParam[+].name = "status"
+* rest[0].resource[=].searchParam[=].type = #token
+* rest[0].resource[=].searchParam[=].documentation = "Filter by status (completed | in-progress)"
+
+// -- ValueSet resource --------------------------------------------------------
+* rest[0].resource[+].type = #ValueSet
+* rest[0].resource[=].interaction[0].code = #read
+* rest[0].resource[=].interaction[+].code = #search-type
+
+* rest[0].resource[=].searchParam[0].name = "name"
+* rest[0].resource[=].searchParam[0].type = #string
+* rest[0].resource[=].searchParam[0].documentation = "Search by ValueSet name"
+
+* rest[0].resource[=].searchParam[+].name = "url"
+* rest[0].resource[=].searchParam[=].type = #uri
+* rest[0].resource[=].searchParam[=].documentation = "Search by canonical URL (exact match)"
+
+* rest[0].resource[=].operation[0].name = "expand"
+* rest[0].resource[=].operation[0].definition = "http://hl7.org/fhir/OperationDefinition/ValueSet-expand"
+
+// -- CodeSystem resource ------------------------------------------------------
+* rest[0].resource[+].type = #CodeSystem
+* rest[0].resource[=].interaction[0].code = #read
+* rest[0].resource[=].interaction[+].code = #search-type
+
+* rest[0].resource[=].searchParam[0].name = "name"
+* rest[0].resource[=].searchParam[0].type = #string
+* rest[0].resource[=].searchParam[0].documentation = "Search by CodeSystem name"
+
+* rest[0].resource[=].searchParam[+].name = "url"
+* rest[0].resource[=].searchParam[=].type = #uri
+* rest[0].resource[=].searchParam[=].documentation = "Search by canonical URL (exact match)"
+
+// -- Bundle resource ----------------------------------------------------------
+* rest[0].resource[+].type = #Bundle
+* rest[0].resource[=].interaction[0].code = #read
+* rest[0].resource[=].interaction[+].code = #search-type
+
+* rest[0].resource[=].searchParam[0].name = "type"
+* rest[0].resource[=].searchParam[0].type = #token
+* rest[0].resource[=].searchParam[0].documentation = "Filter by bundle type (document | searchset)"
