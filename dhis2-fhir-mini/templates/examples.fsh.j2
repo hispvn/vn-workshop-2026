@@ -10,3 +10,20 @@ Title: "{{ p.title }}"
 * gender = #{{ p.gender }}
 * birthDate = "{{ p.birth_date }}"
 {% endfor %}
+{% for r in responses %}
+
+Instance: {{ r.instance_id }}
+InstanceOf: QuestionnaireResponse
+Title: "{{ r.title }}"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference({{ r.patient_id }})
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "{{ r.date }}"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = {{ r.systolic }}
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = {{ r.diastolic }}
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#{{ r.category }}
+{% endfor %}

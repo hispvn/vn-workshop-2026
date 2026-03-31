@@ -47,47 +47,403 @@ Title: "Patient Connie Lawrence"
 * birthDate = "2008-02-04"
 
 
-Instance: Patient006
-InstanceOf: MyPatient
-Title: "Patient Peter Moore"
-* name.family = "Moore"
-* name.given = "Peter"
-* gender = #male
-* birthDate = "1973-04-12"
+
+Instance: BP001x01
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 1 for Patient001"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient001)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2026-01-18"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 100
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 108
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
 
 
-Instance: Patient007
-InstanceOf: MyPatient
-Title: "Patient Brittney Bernard"
-* name.family = "Bernard"
-* name.given = "Brittney"
-* gender = #female
-* birthDate = "1965-07-15"
+Instance: BP001x02
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 2 for Patient001"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient001)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-07-09"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 154
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 81
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#followup
 
 
-Instance: Patient008
-InstanceOf: MyPatient
-Title: "Patient James Howard"
-* name.family = "Howard"
-* name.given = "James"
-* gender = #male
-* birthDate = "1966-03-14"
+Instance: BP001x03
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 3 for Patient001"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient001)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-07-31"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 127
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 108
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
 
 
-Instance: Patient009
-InstanceOf: MyPatient
-Title: "Patient Renee Blair"
-* name.family = "Blair"
-* name.given = "Renee"
-* gender = #female
-* birthDate = "1983-07-04"
+Instance: BP001x04
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 4 for Patient001"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient001)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-05-04"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 111
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 84
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#routine
 
 
-Instance: Patient010
-InstanceOf: MyPatient
-Title: "Patient Angela Carter"
-* name.family = "Carter"
-* name.given = "Angela"
-* gender = #female
-* birthDate = "1991-10-28"
+Instance: BP001x05
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 5 for Patient001"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient001)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-07-04"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 144
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 98
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#followup
+
+
+Instance: BP002x01
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 1 for Patient002"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient002)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-09-14"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 105
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 106
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
+
+
+Instance: BP002x02
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 2 for Patient002"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient002)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-04-27"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 115
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 84
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#routine
+
+
+Instance: BP002x03
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 3 for Patient002"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient002)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-11-15"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 137
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 113
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
+
+
+Instance: BP002x04
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 4 for Patient002"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient002)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-06-08"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 146
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 96
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#followup
+
+
+Instance: BP002x05
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 5 for Patient002"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient002)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-11-27"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 108
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 62
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#routine
+
+
+Instance: BP003x01
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 1 for Patient003"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient003)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2026-02-06"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 137
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 65
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#routine
+
+
+Instance: BP003x02
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 2 for Patient003"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient003)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-07-09"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 112
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 84
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#routine
+
+
+Instance: BP003x03
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 3 for Patient003"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient003)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-08-10"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 181
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 113
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
+
+
+Instance: BP003x04
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 4 for Patient003"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient003)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-06-14"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 147
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 82
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#followup
+
+
+Instance: BP003x05
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 5 for Patient003"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient003)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2026-03-07"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 134
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 104
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
+
+
+Instance: BP004x01
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 1 for Patient004"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient004)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-11-07"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 182
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 64
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
+
+
+Instance: BP004x02
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 2 for Patient004"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient004)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-12-21"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 121
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 94
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#followup
+
+
+Instance: BP004x03
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 3 for Patient004"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient004)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-08-15"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 120
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 89
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#routine
+
+
+Instance: BP004x04
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 4 for Patient004"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient004)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-10-19"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 181
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 104
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
+
+
+Instance: BP004x05
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 5 for Patient004"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient004)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2026-01-05"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 141
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 113
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
+
+
+Instance: BP005x01
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 1 for Patient005"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient005)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2026-01-24"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 107
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 74
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#routine
+
+
+Instance: BP005x02
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 2 for Patient005"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient005)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-07-05"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 140
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 85
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#followup
+
+
+Instance: BP005x03
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 3 for Patient005"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient005)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2026-02-13"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 127
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 96
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#followup
+
+
+Instance: BP005x04
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 4 for Patient005"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient005)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-11-24"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 140
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 73
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#followup
+
+
+Instance: BP005x05
+InstanceOf: QuestionnaireResponse
+Title: "BP reading 5 for Patient005"
+* questionnaire = Canonical(BloodPressureQuestionnaire)
+* status = #completed
+* subject = Reference(Patient005)
+* item[0].linkId = "date"
+* item[0].answer.valueDate = "2025-09-13"
+* item[1].linkId = "systolic"
+* item[1].answer.valueInteger = 150
+* item[2].linkId = "diastolic"
+* item[2].answer.valueInteger = 101
+* item[3].linkId = "category"
+* item[3].answer.valueCoding = CategoryCS#emergency
 
