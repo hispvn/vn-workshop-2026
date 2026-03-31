@@ -15,7 +15,7 @@ docker-sushi:      ## Run SUSHI only (compile FSH → JSON)
 
 docker-build:      ## Run full IG Publisher (SUSHI + validation + HTML)
 	docker run --rm -v $$(pwd)/$(IG_DIR):/home/publisher/ig $(DOCKER_IMAGE) \
-	  java -jar /home/publisher/.ig-publisher/publisher.jar ig.ini -ig .
+	  java -Xmx4g -jar /home/publisher/.ig-publisher/publisher.jar ig.ini -ig .
 
 run:               ## Run the FHIR resource renderer (http://localhost:8000)
 	uv run fastapi dev src/dhis2_fhir/app.py
