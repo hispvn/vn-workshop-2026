@@ -10,6 +10,12 @@
     <div><a href="/json/Bundle/{{ bundle.id }}" class="btn-secondary btn-sm">View JSON</a></div>
 </div>
 
+<div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-5">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/Bundle/{{ bundle.id }}</code>
+    <a href="/json/Bundle/{{ bundle.id }}" class="text-xs text-primary-600 hover:text-primary-700 ml-3 no-underline">View as FHIR JSON</a>
+</div>
+
 {% if patient %}
 <div class="bg-white rounded-lg shadow-sm p-6 mb-5">
     <h2 class="text-lg font-semibold text-gray-700 mb-4">Patient</h2>

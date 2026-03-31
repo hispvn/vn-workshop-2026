@@ -3,7 +3,7 @@
 {% block content %}
 <h1 class="text-2xl font-bold text-slate-900 mb-4">{{ resource.resourceType }} / {{ resource.id }}</h1>
 
-<div class="flex flex-wrap gap-4 text-sm text-slate-500 mb-5">
+<div class="flex flex-wrap gap-4 text-sm text-slate-500 mb-4">
     <div><strong class="text-slate-700">Resource Type:</strong> {{ resource.resourceType }}</div>
     <div><strong class="text-slate-700">ID:</strong> <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">{{ resource.id }}</code></div>
     {% if resource.url %}
@@ -14,9 +14,24 @@
     {% endif %}
 </div>
 
+<div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-5">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/{{ resource.resourceType }}/{{ resource.id }}</code>
+    <a href="/fhir/{{ resource.resourceType }}/{{ resource.id }}" target="_blank" class="text-xs text-primary-600 hover:text-primary-700 ml-3 no-underline">View raw FHIR JSON</a>
+    {% if resource.resourceType == 'ValueSet' and resource.url %}
+    <br>
+    <span class="text-xs text-gray-500 font-medium">Expand:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/ValueSet/$expand?url={{ resource.url }}</code>
+    <a href="/fhir/ValueSet/$expand?url={{ resource.url }}" target="_blank" class="text-xs text-primary-600 hover:text-primary-700 ml-3 no-underline">View expanded FHIR JSON</a>
+    {% endif %}
+</div>
+
 {% if expanded_json %}
 <div class="flex gap-2 mb-4">
-    <button onclick="toggleExpanded()" id="toggle-btn" class="btn-primary">Show Expanded (references resolved)</button>
+    <button onclick="toggleExpanded()" id="toggle-btn" class="btn-primary"
+        data-label-expanded="{% if resource.resourceType == 'ValueSet' %}Show Expanded (concepts resolved){% elif resource.resourceType == 'Questionnaire' %}Show Expanded (ValueSets resolved){% else %}Show Expanded (references resolved){% endif %}"
+        data-label-original="Show Original"
+    >{% if resource.resourceType == 'ValueSet' %}Show Expanded (concepts resolved){% elif resource.resourceType == 'Questionnaire' %}Show Expanded (ValueSets resolved){% else %}Show Expanded (references resolved){% endif %}</button>
     {% if resource.resourceType == 'Bundle' and resource.type == 'document' %}
     <a href="/ips/{{ resource.id }}" class="btn-secondary">View as IPS</a>
     {% endif %}
@@ -30,7 +45,7 @@
 
 {% if expanded_json %}
 <div class="card p-5 mt-4" id="json-expanded" style="display:none;">
-    <h3 class="text-base font-semibold text-slate-700 mb-3">Expanded (references resolved inline)</h3>
+    <h3 class="text-base font-semibold text-slate-700 mb-3">{% if resource.resourceType == 'ValueSet' %}Expanded (concepts resolved via $expand){% elif resource.resourceType == 'Questionnaire' %}Expanded (answerValueSet references resolved){% else %}Expanded (references resolved inline){% endif %}</h3>
     <pre class="rounded-lg overflow-x-auto text-xs leading-relaxed"><code class="language-json">{{ expanded_json }}</code></pre>
 </div>
 
@@ -42,11 +57,11 @@ function toggleExpanded() {
     if (exp.style.display === 'none') {
         exp.style.display = 'block';
         orig.style.display = 'none';
-        btn.textContent = 'Show Original';
+        btn.textContent = btn.getAttribute('data-label-original');
     } else {
         exp.style.display = 'none';
         orig.style.display = 'block';
-        btn.textContent = 'Show Expanded (references resolved)';
+        btn.textContent = btn.getAttribute('data-label-expanded');
     }
 }
 </script>

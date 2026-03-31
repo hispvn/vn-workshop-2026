@@ -2,7 +2,13 @@
 {% block title %}IPS Bundles — DHIS2-FHIR{% endblock %}
 {% block content %}
 <h1 class="text-2xl font-bold text-gray-800 mb-2">International Patient Summaries ({{ bundles|length }})</h1>
-<p class="text-gray-500 mb-6">IPS document Bundles containing Patient demographics and Immunization records.</p>
+<p class="text-gray-500 mb-4">IPS document Bundles containing Patient demographics and Immunization records.</p>
+
+<div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-5">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/Bundle?type=document</code>
+    <a href="/fhir/Bundle?type=document" target="_blank" class="text-xs text-primary-600 hover:text-primary-700 ml-3 no-underline">View as FHIR JSON</a>
+</div>
 
 {% if bundles %}
 <div class="bg-white rounded-lg shadow-sm p-6">

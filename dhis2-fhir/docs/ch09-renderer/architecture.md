@@ -215,7 +215,25 @@ The app defines routes across four groups:
 | `GET /patient/{pid}` | `patient.html` | Patient profile card with observations and form submissions |
 | `GET /questionnaire/{qid}` | `questionnaire.html` | Interactive form with resolved options |
 | `GET /response/{rid}` | `questionnaire.html` | Pre-filled form from response data |
-| `GET /json/{type}/{rid}` | `json_view.html` | Raw JSON display |
+| `GET /json/{type}/{rid}` | `json_view.html` | Raw JSON display with syntax highlighting (toggle expanded view for ValueSets and Questionnaires) |
+
+**Questionnaire filling:**
+
+| Route | Template | Purpose |
+|-------|----------|---------|
+| `GET /forms` | `forms_list.html` | Questionnaires page -- browse definitions, fill anonymous or patient questionnaires, view QuestionnaireResponses |
+| `GET /form/{qid}` | `questionnaire.html` | Fill an anonymous questionnaire (event program) |
+| `GET /patient/{pid}/form/{qid}` | `questionnaire.html` | Fill a questionnaire for a specific patient (tracker program) |
+| `POST /form/save` | — | Save a QuestionnaireResponse (redirects to patient or response view) |
+
+**Terminology browsing:**
+
+| Route | Template | Purpose |
+|-------|----------|---------|
+| `GET /terminology/valuesets` | `valueset_list.html` | Browse all ValueSets with concept counts |
+| `GET /terminology/valueset/{vid}` | `valueset_detail.html` | ValueSet detail with expanded concepts |
+| `GET /terminology/codesystems` | `codesystem_list.html` | Browse all CodeSystems with concept counts |
+| `GET /terminology/codesystem/{csid}` | `codesystem_detail.html` | CodeSystem detail with all concepts |
 
 **Patient CRUD:**
 
@@ -305,6 +323,24 @@ QuestionnaireItem.answerValueSet (URL)
 ```
 
 The function is passed to the template as `resolve_options`, so Jinja2 can call it for each item during rendering.
+
+### Client-side ValueSet expansion
+
+When filling a questionnaire, choice fields that reference an `answerValueSet` populate their dropdown options via the FHIR API rather than server-side resolution. The template renders an empty `<select>` with a `data-valueset-url` attribute, and JavaScript calls `GET /fhir/ValueSet/$expand?url={answerValueSet}` to fetch the expanded concepts. Each dropdown shows the FHIR `$expand` URL being called, making the FHIR interaction visible to workshop participants.
+
+Items with inline `answerOption` entries (no ValueSet reference) still render their options server-side.
+
+### FHIR URL annotations
+
+Throughout the UI, FHIR Equivalent annotations show the corresponding FHIR REST API call for the data being displayed. For example, a Patient profile page shows `GET /fhir/Patient/{id}`, and a ValueSet detail page shows both the read URL and the `$expand` URL. These annotations link to either the rendered JSON view (`/json/`) for single resources or the raw FHIR API (`/fhir/`) for search bundles.
+
+### Patient search via FHIR API
+
+The Questionnaires page uses client-side FHIR search to find patients. Instead of a static dropdown, users type into a search field that calls `GET /fhir/Patient?name={query}` and displays matching results. This demonstrates the FHIR patient search API in real-time.
+
+### Anonymous vs patient questionnaires
+
+The Questionnaires page separates anonymous (event program) and patient (tracker program) questionnaire filling. Anonymous questionnaires have no `subjectType` and submit without a patient reference. Patient questionnaires require selecting a patient via FHIR search before filling.
 
 ## Templates
 

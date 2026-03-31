@@ -218,13 +218,19 @@ IPS = cross-border immunization verification.
 
 <div class="border rounded p-3">
 
-**Forms** — fill & submit questionnaires
+**Questionnaires** — fill & submit QuestionnaireResponses
 
 </div>
 
 <div class="border rounded p-3">
 
-**FHIR API** — JSON responses, Postman collection
+**Terminology** — browse ValueSets & CodeSystems, $expand
+
+</div>
+
+<div class="border rounded p-3">
+
+**FHIR API** — Patient, Questionnaire, ValueSet/$expand, Postman collection
 
 </div>
 

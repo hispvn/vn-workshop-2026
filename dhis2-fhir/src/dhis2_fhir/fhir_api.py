@@ -12,17 +12,20 @@ from __future__ import annotations
 import json
 import random
 import string
+from datetime import date
 
 from fastapi import APIRouter, Header, Request
 from fastapi.responses import JSONResponse
 
 from .loader import (
     load_bundles,
+    load_codesystems,
     load_immunizations,
     load_patients,
     load_questionnaire_responses,
     load_questionnaires,
     load_raw_json,
+    load_valuesets,
 )
 from .models import Patient
 from .store import save_resource
@@ -569,4 +572,151 @@ async def read_bundle(bid: str) -> JSONResponse:
     raw = load_raw_json("Bundle", bid)
     if not raw:
         return _operation_outcome("error", "not-found", f"Bundle/{bid} not found", 404)
+    return _fhir_json(raw)
+
+
+# ---------------------------------------------------------------------------
+# GET /fhir/ValueSet — Search ValueSets
+# ---------------------------------------------------------------------------
+
+
+@fhir_router.get("/ValueSet")
+async def search_valuesets(
+    request: Request,
+    name: str = "",
+    url: str = "",
+    _count: int = 50,
+    _offset: int = 0,
+) -> JSONResponse:
+    all_vs = load_valuesets()
+    filtered = list(all_vs.values())
+
+    if name:
+        q = name.lower()
+        filtered = [vs for vs in filtered if q in vs.name.lower()]
+
+    if url:
+        filtered = [vs for vs in filtered if vs.url == url]
+
+    total = len(filtered)
+    page = filtered[_offset : _offset + _count]
+
+    entries = []
+    for vs in page:
+        raw = load_raw_json("ValueSet", vs.id)
+        if raw:
+            entries.append(raw)
+        else:
+            entries.append(json.loads(vs.model_dump_json(exclude_none=True)))
+
+    self_url = str(request.url)
+    return _fhir_json(_make_search_bundle(entries, total, self_url))
+
+
+# ---------------------------------------------------------------------------
+# GET /fhir/ValueSet/$expand — Expand ValueSet
+# ---------------------------------------------------------------------------
+
+
+@fhir_router.get("/ValueSet/$expand")
+async def expand_valueset(
+    request: Request,
+    url: str = "",
+) -> JSONResponse:
+    all_vs = load_valuesets()
+    vs = all_vs.get(url)
+    if not vs:
+        return _operation_outcome("error", "not-found", f"ValueSet with url={url} not found", 404)
+
+    codesystems = load_codesystems()
+    contains: list[dict] = []
+
+    if vs.compose:
+        for include in vs.compose.include:
+            system_url = include.system
+            if include.concept:
+                # Explicit concepts listed in the include
+                for concept in include.concept:
+                    contains.append({"system": system_url, "code": concept.code, "display": concept.display})
+            elif system_url in codesystems:
+                # Include all concepts from the referenced CodeSystem
+                cs = codesystems[system_url]
+                for concept in cs.concept:
+                    contains.append({"system": system_url, "code": concept.code, "display": concept.display})
+
+    expanded: dict = {
+        "resourceType": "ValueSet",
+        "id": vs.id,
+        "url": vs.url,
+        "name": vs.name,
+        "status": "active",
+        "expansion": {
+            "timestamp": date.today().isoformat(),
+            "contains": contains,
+        },
+    }
+    return _fhir_json(expanded)
+
+
+# ---------------------------------------------------------------------------
+# GET /fhir/ValueSet/{vid} — Read ValueSet
+# ---------------------------------------------------------------------------
+
+
+@fhir_router.get("/ValueSet/{vid}")
+async def read_valueset(vid: str) -> JSONResponse:
+    raw = load_raw_json("ValueSet", vid)
+    if not raw:
+        return _operation_outcome("error", "not-found", f"ValueSet/{vid} not found", 404)
+    return _fhir_json(raw)
+
+
+# ---------------------------------------------------------------------------
+# GET /fhir/CodeSystem — Search CodeSystems
+# ---------------------------------------------------------------------------
+
+
+@fhir_router.get("/CodeSystem")
+async def search_codesystems(
+    request: Request,
+    name: str = "",
+    url: str = "",
+    _count: int = 50,
+    _offset: int = 0,
+) -> JSONResponse:
+    all_cs = load_codesystems()
+    filtered = list(all_cs.values())
+
+    if name:
+        q = name.lower()
+        filtered = [cs for cs in filtered if q in cs.name.lower()]
+
+    if url:
+        filtered = [cs for cs in filtered if cs.url == url]
+
+    total = len(filtered)
+    page = filtered[_offset : _offset + _count]
+
+    entries = []
+    for cs in page:
+        raw = load_raw_json("CodeSystem", cs.id)
+        if raw:
+            entries.append(raw)
+        else:
+            entries.append(json.loads(cs.model_dump_json(exclude_none=True)))
+
+    self_url = str(request.url)
+    return _fhir_json(_make_search_bundle(entries, total, self_url))
+
+
+# ---------------------------------------------------------------------------
+# GET /fhir/CodeSystem/{csid} — Read CodeSystem
+# ---------------------------------------------------------------------------
+
+
+@fhir_router.get("/CodeSystem/{csid}")
+async def read_codesystem(csid: str) -> JSONResponse:
+    raw = load_raw_json("CodeSystem", csid)
+    if not raw:
+        return _operation_outcome("error", "not-found", f"CodeSystem/{csid} not found", 404)
     return _fhir_json(raw)

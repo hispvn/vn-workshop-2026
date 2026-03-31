@@ -14,6 +14,12 @@
     {% endif %}
 </div>
 
+<div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-5">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/Patient/{{ patient.id }}</code>
+    <a href="/json/Patient/{{ patient.id }}" class="text-xs text-primary-600 hover:text-primary-700 ml-3 no-underline">View as FHIR JSON</a>
+</div>
+
 <!-- Demographics -->
 <div class="bg-white rounded-lg shadow-sm p-6 mb-5">
     <h2 class="text-lg font-semibold text-gray-700 mb-4">Demographics</h2>
@@ -167,9 +173,10 @@
 <!-- Responses -->
 <div class="bg-white rounded-lg shadow-sm p-6 mb-5">
     <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-gray-700">Form Submissions ({{ responses|length }})</h2>
-        <a href="/forms?patient={{ patient.id }}" class="btn-primary btn-sm">+ Fill Form</a>
+        <h2 class="text-lg font-semibold text-gray-700">QuestionnaireResponses ({{ responses|length }})</h2>
+        <a href="/forms?patient={{ patient.id }}" class="btn-primary btn-sm">+ Fill Questionnaire</a>
     </div>
+    <p class="text-xs text-gray-400 mb-3">FHIR: <code class="bg-gray-100 px-1 rounded">GET /fhir/QuestionnaireResponse?subject=Patient/{{ patient.id }}</code> <a href="/fhir/QuestionnaireResponse?subject=Patient/{{ patient.id }}" target="_blank" class="text-primary-600 hover:text-primary-700 no-underline">View JSON</a></p>
     {% if responses %}
     <p class="text-sm text-gray-500 mb-3">QuestionnaireResponses linked to this patient.</p>
     <table class="w-full text-sm">
@@ -198,7 +205,7 @@
         </tbody>
     </table>
     {% else %}
-    <p class="text-gray-400 italic">No form submissions yet. Click "+ Fill Form" to submit a questionnaire response.</p>
+    <p class="text-gray-400 italic">No QuestionnaireResponses yet. Click "+ Fill Questionnaire" to submit one.</p>
     {% endif %}
 </div>
 

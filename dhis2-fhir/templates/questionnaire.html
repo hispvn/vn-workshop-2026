@@ -20,6 +20,12 @@
     {% endif %}
 </div>
 
+<div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-5">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/Questionnaire/{{ q.id }}</code>
+    <a href="/json/Questionnaire/{{ q.id }}" class="text-xs text-primary-600 hover:text-primary-700 ml-3 no-underline">View as FHIR JSON</a>
+</div>
+
 {% if response %}
 <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-md text-sm mb-5">
     <strong>Viewing QuestionnaireResponse:</strong> <code class="bg-blue-100 px-1 rounded">{{ response.id }}</code>
@@ -76,12 +82,19 @@
                 <input type="hidden" name="text_{{ link_id }}" value="{{ item.text or link_id }}">
                 <input type="hidden" name="type_{{ link_id }}" value="{{ item_type }}">
                 {% if item_type == 'choice' or item_type == 'coding' %}
+                    {% if item.answerValueSet %}
+                    <select name="answer_{{ link_id }}" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm vs-expand-select" data-valueset-url="{{ item.answerValueSet }}" {{ 'required' if is_required else '' }}>
+                        <option value="">Loading...</option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">FHIR: <code class="bg-gray-100 px-1 rounded">GET /fhir/ValueSet/$expand?url={{ item.answerValueSet }}</code></p>
+                    {% else %}
                     <select name="answer_{{ link_id }}" class="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md text-sm" {{ 'required' if is_required else '' }}>
                         <option value="">-- Select --</option>
                         {% for opt in options %}
                         <option value="{{ opt.code }}" {{ 'selected' if opt.code == answer_val|string else '' }}>{{ opt.display or opt.code }}</option>
                         {% endfor %}
                     </select>
+                    {% endif %}
                 {% elif item_type == 'boolean' %}
                     <label class="inline-flex items-center gap-1.5 text-sm"><input type="checkbox" name="answer_{{ link_id }}" value="true" {{ 'checked' if answer_val else '' }} class="accent-primary-600"> Yes</label>
                 {% elif item_type == 'integer' %}
@@ -121,22 +134,33 @@
 
 <div class="bg-white rounded-lg shadow-sm p-6 mb-5">
     <h2 class="text-lg font-semibold text-gray-700 mb-4">Form Fields</h2>
-    <form {% if patient is defined and patient %}method="post" action="/form/save"{% else %}onsubmit="return false;"{% endif %}>
-        {% if patient is defined and patient %}
-        <input type="hidden" name="patient_id" value="{{ patient.id }}">
+    {% set can_submit = (patient is defined and patient) or (anonymous is defined and anonymous) %}
+    <form {% if can_submit %}method="post" action="/form/save"{% else %}onsubmit="return false;"{% endif %}>
+        {% if can_submit %}
         <input type="hidden" name="questionnaire_url" value="{{ q.url }}">
         <input type="hidden" name="questionnaire_id" value="{{ q.id }}">
+        {% endif %}
+        {% if patient is defined and patient %}
+        <input type="hidden" name="patient_id" value="{{ patient.id }}">
         <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-md text-sm mb-5">
             Filling for: <strong><a href="/patient/{{ patient.id }}" class="underline">{{ patient.display_name }}</a></strong>
+        </div>
+        {% elif anonymous is defined and anonymous %}
+        <div class="bg-purple-50 text-purple-700 px-4 py-3 rounded-md text-sm mb-5">
+            Anonymous form (Event Program) — no patient linked
         </div>
         {% endif %}
         {% for item in q.item %}
             {{ render_item(item, 1) }}
         {% endfor %}
-        {% if patient is defined and patient %}
+        {% if can_submit %}
         <div class="pt-4 border-t border-gray-200 flex gap-2 mt-4">
             <button type="submit" class="btn-primary">Submit Response</button>
+            {% if patient is defined and patient %}
             <a href="/patient/{{ patient.id }}" class="btn-secondary">Cancel</a>
+            {% else %}
+            <a href="/forms" class="btn-secondary">Cancel</a>
+            {% endif %}
         </div>
         {% endif %}
     </form>
@@ -144,7 +168,8 @@
 
 {% if related_responses %}
 <div class="bg-white rounded-lg shadow-sm p-6 mb-5">
-    <h2 class="text-lg font-semibold text-gray-700 mb-4">Submitted Responses ({{ related_responses|length }})</h2>
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">QuestionnaireResponses ({{ related_responses|length }})</h2>
+    <p class="text-xs text-gray-400 mb-3">FHIR: <code class="bg-gray-100 px-1 rounded">GET /fhir/QuestionnaireResponse?questionnaire={{ q.url }}</code> <a href="/fhir/QuestionnaireResponse?questionnaire={{ q.url }}" target="_blank" class="text-primary-600 hover:text-primary-700 no-underline">View JSON</a></p>
     <table class="w-full text-sm">
         <thead>
             <tr class="border-b border-gray-200">
@@ -183,4 +208,32 @@
     <a href="/json/Questionnaire/{{ q.id }}" class="btn-secondary">View Questionnaire JSON</a>
     <a href="/" class="btn-secondary">Back to list</a>
 </div>
+
+<script>
+(function() {
+    var selects = document.querySelectorAll('select.vs-expand-select');
+    selects.forEach(function(sel) {
+        var vsUrl = sel.getAttribute('data-valueset-url');
+        if (!vsUrl) return;
+        fetch('/fhir/ValueSet/$expand?url=' + encodeURIComponent(vsUrl))
+            .then(function(r) { return r.json(); })
+            .then(function(vs) {
+                sel.innerHTML = '<option value="">-- Select --</option>';
+                var contains = (vs.expansion && vs.expansion.contains) || [];
+                contains.forEach(function(c) {
+                    var opt = document.createElement('option');
+                    opt.value = c.code;
+                    opt.textContent = c.display || c.code;
+                    sel.appendChild(opt);
+                });
+                if (contains.length === 0) {
+                    sel.innerHTML = '<option value="">No options available</option>';
+                }
+            })
+            .catch(function() {
+                sel.innerHTML = '<option value="">Failed to load options</option>';
+            });
+    });
+})();
+</script>
 {% endblock %}

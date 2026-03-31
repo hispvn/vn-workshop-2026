@@ -71,7 +71,14 @@
                     <a href="/forms" class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors no-underline
                         {% if current_path.startswith('/questionnaire') or current_path.startswith('/response') or current_path.startswith('/form') %}bg-white/10 text-white font-medium{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
                         <svg class="w-4 h-4 mr-3 {% if current_path.startswith('/questionnaire') or current_path.startswith('/response') or current_path.startswith('/form') %}text-primary-400{% else %}text-slate-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                        Forms
+                        Questionnaires
+                    </a>
+                </li>
+                <li>
+                    <a href="/terminology/valuesets" class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-colors no-underline
+                        {% if current_path.startswith('/terminology') %}bg-white/10 text-white font-medium{% else %}text-slate-300 hover:bg-white/5 hover:text-white{% endif %}">
+                        <svg class="w-4 h-4 mr-3 {% if current_path.startswith('/terminology') %}text-primary-400{% else %}text-slate-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Terminology
                     </a>
                 </li>
                 <li>
@@ -91,7 +98,7 @@
         </nav>
 
         <!-- Main Content -->
-        <main class="flex-1 ml-56 p-8 max-w-5xl">
+        <main class="flex-1 ml-56 p-8">
             {% block content %}{% endblock %}
         </main>
     </div>

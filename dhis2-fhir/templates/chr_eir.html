@@ -61,6 +61,12 @@
     </div>
 </div>
 
+<div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-4">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/Patient/{{ patient.id }}</code>
+    <a href="/json/Patient/{{ patient.id }}" class="text-xs text-primary-600 hover:text-primary-700 ml-3 no-underline">View as FHIR JSON</a>
+</div>
+
 <!-- Immunization History -->
 <div class="bg-white rounded-lg border border-gray-200">
     <div class="px-6 py-3 border-b border-gray-200 flex items-center justify-between">

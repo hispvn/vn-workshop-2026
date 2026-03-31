@@ -97,7 +97,7 @@ ig/            FHIR Implementation Guide / SUSHI project
 exercises/     10 hands-on FSH exercises (starter + solution)
 src/dhis2_fhir/
   app.py       FastAPI application and HTML routes
-  fhir_api.py  FHIR REST API (Patient, Immunization)
+  fhir_api.py  FHIR REST API (Patient, Immunization, Questionnaire, ValueSet/$expand, CodeSystem, Bundle)
   models.py    Pydantic models for FHIR resources
   store.py     JSON file store for user-created resources
   loader.py    Loads SUSHI-generated and user resources

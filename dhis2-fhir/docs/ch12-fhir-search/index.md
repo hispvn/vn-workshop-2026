@@ -15,6 +15,23 @@ When DHIS2 data is mapped to FHIR resources and stored on a FHIR server, search 
 
 In the Lao PDR context, the health registry must support searching patients across six identifier types and multiple attribute combinations. Understanding FHIR search is essential to implementing these patterns correctly.
 
+## Available FHIR Endpoints
+
+The renderer's FHIR API (mounted at `/fhir/`) provides these searchable resources:
+
+| Endpoint | Key Parameters |
+|----------|---------------|
+| `GET /fhir/Patient` | `name`, `given`, `family`, `gender`, `birthdate`, `identifier`, `phone`, `address` |
+| `GET /fhir/Questionnaire` | `name`, `title`, `status` |
+| `GET /fhir/QuestionnaireResponse` | `questionnaire`, `subject`, `status` |
+| `GET /fhir/Immunization` | `patient` |
+| `GET /fhir/ValueSet` | `name`, `url` |
+| `GET /fhir/ValueSet/$expand` | `url` (returns expanded ValueSet with `expansion.contains`) |
+| `GET /fhir/CodeSystem` | `name`, `url` |
+| `GET /fhir/Bundle` | `type` |
+
+All search endpoints return FHIR searchset Bundles and support `_count` and `_offset` for pagination.
+
 ## What This Chapter Covers
 
 - [Search Basics](search-basics.md) -- HTTP mechanics, searchset Bundles, pagination, and response codes

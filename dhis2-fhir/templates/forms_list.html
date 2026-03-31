@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Forms — DHIS2-FHIR{% endblock %}
+{% block title %}Questionnaires — DHIS2-FHIR{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-bold text-slate-900 mb-1">Forms</h1>
-<p class="text-slate-500 mb-6">Questionnaire definitions and submitted responses.</p>
+<h1 class="text-2xl font-bold text-slate-900 mb-1">Questionnaires</h1>
+<p class="text-slate-500 mb-6">Questionnaire definitions and QuestionnaireResponses.</p>
 
 <!-- Questionnaires -->
 <div class="card card-accent-amber p-6 mb-5">
     <h2 class="text-lg font-semibold text-slate-800 mb-3">Questionnaires ({{ questionnaires|length }})</h2>
-    <p class="text-sm text-slate-500 mb-4">Each form definition maps to a DHIS2 program stage.</p>
+    <p class="text-sm text-slate-500 mb-3">Each form definition maps to a DHIS2 program stage.</p>
+    <p class="text-xs text-slate-400 mb-3">FHIR: <code class="bg-slate-100 px-1 rounded">GET /fhir/Questionnaire</code> <a href="/fhir/Questionnaire" target="_blank" class="text-primary-600 hover:text-primary-700 no-underline">View JSON</a></p>
     {% if questionnaires %}
     <table class="w-full text-sm zebra-table">
         <thead>
@@ -43,42 +44,60 @@
     {% endif %}
 </div>
 
-<!-- Fill a form for a patient -->
-<div class="card card-accent-blue p-6 mb-5">
-    <h2 class="text-lg font-semibold text-slate-800 mb-3">Fill a Form</h2>
-    <p class="text-sm text-slate-500 mb-4">Search for a patient using the FHIR API and select a questionnaire to fill out.</p>
-    <form method="get" id="fill-form">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Patient</label>
-                <div class="relative">
-                    <input type="hidden" id="fill-patient" value="{{ selected_patient.id if selected_patient else '' }}">
-                    <input type="text" id="patient-search" autocomplete="off"
-                        class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
-                        placeholder="Type to search patients..."
-                        value="{{ selected_patient.display_name if selected_patient else '' }}">
-                    <div id="patient-results" class="absolute z-10 w-full bg-white border border-slate-300 rounded-md mt-1 shadow-lg max-h-60 overflow-y-auto hidden"></div>
-                </div>
-                <p class="text-xs text-slate-400 mt-1">FHIR: GET /fhir/Patient?name=...</p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Questionnaire</label>
-                <select id="fill-questionnaire" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
-                    {% for q in questionnaires %}
-                    <option value="{{ q.id }}">{{ q.display_title }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="flex items-end">
-                <button type="button" onclick="goFillForm()" class="btn-primary">Start</button>
-            </div>
+<!-- Fill an anonymous form (Event Program) -->
+<div class="card card-accent-purple p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Fill Anonymous Questionnaire</h2>
+    <p class="text-sm text-slate-500 mb-4">Event programs — no patient linked to the submission.</p>
+    <div class="flex gap-4 items-end">
+        <div class="flex-1">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Questionnaire</label>
+            <select id="anon-questionnaire" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
+                {% for q in questionnaires if not q.subjectType %}
+                <option value="{{ q.id }}">{{ q.display_title }}</option>
+                {% endfor %}
+            </select>
         </div>
-    </form>
+        <div>
+            <button type="button" onclick="goFillAnonymous()" class="btn-primary">Start</button>
+        </div>
+    </div>
 </div>
 
-<!-- Submitted Responses -->
+<!-- Fill a form for a patient (Tracker Program) -->
+<div class="card card-accent-blue p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Fill Patient Questionnaire</h2>
+    <p class="text-sm text-slate-500 mb-4">Tracker programs — search for a patient using the FHIR API and select a questionnaire.</p>
+    <div class="flex gap-4 items-end">
+        <div class="flex-1">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Patient</label>
+            <div class="relative">
+                <input type="hidden" id="fill-patient" value="{{ selected_patient.id if selected_patient else '' }}">
+                <input type="text" id="patient-search" autocomplete="off"
+                    class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
+                    placeholder="Type to search patients..."
+                    value="{{ selected_patient.display_name if selected_patient else '' }}">
+                <div id="patient-results" class="absolute z-10 w-full bg-white border border-slate-300 rounded-md mt-1 shadow-lg max-h-60 overflow-y-auto hidden"></div>
+            </div>
+        </div>
+        <div class="flex-1">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Questionnaire</label>
+            <select id="fill-questionnaire" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
+                {% for q in questionnaires if q.subjectType %}
+                <option value="{{ q.id }}">{{ q.display_title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="button" onclick="goFillForm()" class="btn-primary">Start</button>
+        </div>
+    </div>
+    <p class="text-xs text-slate-400 mt-1">FHIR: GET /fhir/Patient?name=...</p>
+</div>
+
+<!-- QuestionnaireResponses -->
 <div class="card card-accent-purple p-6 mb-5">
-    <h2 class="text-lg font-semibold text-slate-800 mb-3">Submitted Responses ({{ responses|length }}){% if selected_patient %} for <a href="/patient/{{ selected_patient.id }}" class="text-primary-600 hover:underline">{{ selected_patient.display_name }}</a>{% endif %}</h2>
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">QuestionnaireResponses ({{ responses|length }}){% if selected_patient %} for <a href="/patient/{{ selected_patient.id }}" class="text-primary-600 hover:underline">{{ selected_patient.display_name }}</a>{% endif %}</h2>
+    <p class="text-xs text-slate-400 mb-3">FHIR: <code class="bg-slate-100 px-1 rounded">GET /fhir/QuestionnaireResponse{% if selected_patient %}?subject=Patient/{{ selected_patient.id }}{% endif %}</code> <a href="/fhir/QuestionnaireResponse{% if selected_patient %}?subject=Patient/{{ selected_patient.id }}{% endif %}" target="_blank" class="text-primary-600 hover:text-primary-700 no-underline">View JSON</a></p>
     {% if responses %}
     <table class="w-full text-sm zebra-table">
         <thead>
@@ -116,11 +135,17 @@
         </tbody>
     </table>
     {% else %}
-    <p class="text-sm text-slate-500">No responses submitted yet.</p>
+    <p class="text-sm text-slate-500">No QuestionnaireResponses submitted yet.</p>
     {% endif %}
 </div>
 
 <script>
+function goFillAnonymous() {
+    var qid = document.getElementById('anon-questionnaire').value;
+    if (!qid) { alert('Please select a questionnaire'); return; }
+    window.location.href = '/form/' + qid;
+}
+
 function goFillForm() {
     var pid = document.getElementById('fill-patient').value;
     var qid = document.getElementById('fill-questionnaire').value;

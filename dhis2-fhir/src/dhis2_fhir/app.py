@@ -649,6 +649,31 @@ async def fill_form_for_patient(request: Request, pid: str, qid: str) -> Respons
     )
 
 
+@app.get("/form/{qid}", response_class=HTMLResponse)
+async def fill_form_anonymous(request: Request, qid: str) -> Response:
+    """Fill a questionnaire without a patient (anonymous/event program)."""
+    questionnaires = load_questionnaires()
+    q = next((q for q in questionnaires if q.id == qid), None)
+    if not q:
+        return HTMLResponse(f"<h1>Questionnaire '{qid}' not found</h1>", status_code=404)
+    valuesets = load_valuesets()
+    codesystems = load_codesystems()
+    return templates.TemplateResponse(
+        "questionnaire.html",
+        {
+            "request": request,
+            "q": q,
+            "valuesets": valuesets,
+            "codesystems": codesystems,
+            "resolve_options": resolve_answer_options,
+            "answers": {},
+            "response": None,
+            "anonymous": True,
+            "today": date.today().isoformat(),
+        },
+    )
+
+
 @app.post("/form/save")
 async def save_form(request: Request) -> RedirectResponse:
     """Save a submitted QuestionnaireResponse."""
@@ -910,6 +935,86 @@ async def observation_delete(oid: str, patient_id: str = Form("")) -> RedirectRe
 
 
 # ---------------------------------------------------------------------------
+# Routes — Terminology (ValueSet / CodeSystem browsing)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/terminology/valuesets", response_class=HTMLResponse)
+async def valueset_list(request: Request) -> Response:
+    """Browse all ValueSets."""
+    valuesets = load_valuesets()
+    codesystems = load_codesystems()
+    return templates.TemplateResponse(
+        "valueset_list.html",
+        {
+            "request": request,
+            "valuesets": sorted(valuesets.values(), key=lambda v: v.name or v.id),
+            "codesystems": codesystems,
+        },
+    )
+
+
+@app.get("/terminology/valueset/{vid}", response_class=HTMLResponse)
+async def valueset_detail(request: Request, vid: str) -> Response:
+    """View a ValueSet and its expanded concepts."""
+    valuesets = load_valuesets()
+    codesystems = load_codesystems()
+    vs = next((v for v in valuesets.values() if v.id == vid), None)
+    if not vs:
+        return HTMLResponse(f"<h1>ValueSet '{vid}' not found</h1>", status_code=404)
+    # Expand concepts
+    concepts: list[dict[str, str]] = []
+    system_url = ""
+    if vs.compose:
+        for include in vs.compose.include:
+            system_url = include.system
+            for concept in include.concept:
+                concepts.append({"system": include.system, "code": concept.code, "display": concept.display})
+            if not include.concept and include.system in codesystems:
+                cs = codesystems[include.system]
+                for concept in cs.concept:
+                    concepts.append({"system": include.system, "code": concept.code, "display": concept.display})
+    return templates.TemplateResponse(
+        "valueset_detail.html",
+        {
+            "request": request,
+            "vs": vs,
+            "concepts": concepts,
+            "system_url": system_url,
+        },
+    )
+
+
+@app.get("/terminology/codesystems", response_class=HTMLResponse)
+async def codesystem_list(request: Request) -> Response:
+    """Browse all CodeSystems."""
+    codesystems = load_codesystems()
+    return templates.TemplateResponse(
+        "codesystem_list.html",
+        {
+            "request": request,
+            "codesystems": sorted(codesystems.values(), key=lambda c: c.name or c.id),
+        },
+    )
+
+
+@app.get("/terminology/codesystem/{csid}", response_class=HTMLResponse)
+async def codesystem_detail(request: Request, csid: str) -> Response:
+    """View a CodeSystem and its concepts."""
+    codesystems = load_codesystems()
+    cs = next((c for c in codesystems.values() if c.id == csid), None)
+    if not cs:
+        return HTMLResponse(f"<h1>CodeSystem '{csid}' not found</h1>", status_code=404)
+    return templates.TemplateResponse(
+        "codesystem_detail.html",
+        {
+            "request": request,
+            "cs": cs,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
 # Routes — IPS Bundle view
 # ---------------------------------------------------------------------------
 
@@ -963,6 +1068,74 @@ def _expand_bundle_json(bundle: dict) -> dict:
                     "_resolved": index[sub_ref],
                 }
     return expanded
+
+
+def _expand_valueset_json(data: dict) -> dict | None:
+    """Return a copy of the ValueSet with expansion.contains resolved from CodeSystems."""
+    import copy
+
+    compose = data.get("compose")
+    if not compose:
+        return None
+    codesystems = load_codesystems()
+    contains: list[dict] = []
+    for include in compose.get("include", []):
+        system = include.get("system", "")
+        concepts = include.get("concept", [])
+        if concepts:
+            for c in concepts:
+                contains.append({"system": system, "code": c.get("code", ""), "display": c.get("display", "")})
+        elif system in codesystems:
+            cs = codesystems[system]
+            for c in cs.concept:
+                contains.append({"system": system, "code": c.code, "display": c.display})
+    if not contains:
+        return None
+    expanded = copy.deepcopy(data)
+    expanded["expansion"] = {
+        "timestamp": date.today().isoformat(),
+        "total": len(contains),
+        "contains": contains,
+    }
+    return expanded
+
+
+def _expand_questionnaire_json(data: dict) -> dict | None:
+    """Return a copy of the Questionnaire with answerValueSet references resolved inline."""
+    import copy
+
+    valuesets = load_valuesets()
+    codesystems = load_codesystems()
+    has_valuesets = False
+
+    def resolve_items(items: list[dict]) -> list[dict]:
+        nonlocal has_valuesets
+        resolved = []
+        for item in items:
+            item = copy.deepcopy(item)
+            vs_url = item.get("answerValueSet", "")
+            if vs_url and vs_url in valuesets:
+                has_valuesets = True
+                vs = valuesets[vs_url]
+                options: list[dict] = []
+                if vs.compose:
+                    for include in vs.compose.include:
+                        for c in include.concept:
+                            options.append({"system": include.system, "code": c.code, "display": c.display})
+                        if not include.concept and include.system in codesystems:
+                            cs = codesystems[include.system]
+                            for c in cs.concept:
+                                options.append({"system": include.system, "code": c.code, "display": c.display})
+                item["_resolvedOptions"] = options
+            if "item" in item:
+                item["item"] = resolve_items(item["item"])
+            resolved.append(item)
+        return resolved
+
+    expanded = copy.deepcopy(data)
+    if "item" in expanded:
+        expanded["item"] = resolve_items(expanded["item"])
+    return expanded if has_valuesets else None
 
 
 @app.get("/ips", response_class=HTMLResponse)
@@ -1262,6 +1435,16 @@ async def view_json(request: Request, resource_type: str, rid: str) -> Response:
     if data.get("resourceType") == "Bundle" and data.get("type") == "document":
         expanded = _expand_bundle_json(data)
         expanded_json = json.dumps(expanded, indent=2)
+    # For ValueSets, show expanded (resolved concepts)
+    elif data.get("resourceType") == "ValueSet":
+        vs_expanded = _expand_valueset_json(data)
+        if vs_expanded:
+            expanded_json = json.dumps(vs_expanded, indent=2)
+    # For Questionnaires, resolve answerValueSet references inline
+    elif data.get("resourceType") == "Questionnaire":
+        q_expanded = _expand_questionnaire_json(data)
+        if q_expanded:
+            expanded_json = json.dumps(q_expanded, indent=2)
     return templates.TemplateResponse(
         "json_view.html",
         {
