@@ -13,7 +13,6 @@ data/
 
 # Node/Bun
 node_modules/
-presentation/slides.pdf
 
 # Python
 .venv/
