@@ -1,11 +1,11 @@
-### My FHIR Implementation Guide
+### Cambodia OPD FHIR Implementation Guide
 
-This is a minimal FHIR Implementation Guide built with [FSH (FHIR Shorthand)](https://build.fhir.org/ig/HL7/fhir-shorthand/).
-
-#### Profiles
-
-- [MyPatient](StructureDefinition-my-patient.html) - A simple Patient profile
+A minimal FHIR Implementation Guide mapping Cambodia's DHIS2 Outpatient Consultation program stage to FHIR, built with [FSH (FHIR Shorthand)](https://build.fhir.org/ig/HL7/fhir-shorthand/).
 
 #### Questionnaires
 
-- [Blood Pressure Form](Questionnaire-BloodPressureQuestionnaire.html) - Collects date, systolic, diastolic, and visit category
+- [OPD Consultation Form](Questionnaire-OPDConsultation.html) - Outpatient consultation (19 items from DHIS2 program stage)
+
+#### Terminology
+
+12 CodeSystems and ValueSets covering age unit, sex, coverage area, patient location, referral source, facility level, case type, diagnosis chapter, referral destination, payment method, vulnerable group, and SpO2 detection.

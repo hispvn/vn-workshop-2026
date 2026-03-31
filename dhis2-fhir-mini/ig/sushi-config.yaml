@@ -1,8 +1,8 @@
-id: my.fhir.ig
-canonical: http://example.org/fhir/ig
-name: MyFHIRIG
-title: My FHIR Implementation Guide
-description: A minimal starting-point Implementation Guide
+id: cambodia.opd.ig
+canonical: http://example.org/fhir/cambodia-opd
+name: CambodiaOPDIG
+title: Cambodia OPD FHIR Implementation Guide
+description: FHIR IG for Cambodia DHIS2 Outpatient Consultation
 status: draft
 version: 0.1.0
 fhirVersion: 4.0.1
