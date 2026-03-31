@@ -46,20 +46,20 @@
 <!-- Fill a form for a patient -->
 <div class="card card-accent-blue p-6 mb-5">
     <h2 class="text-lg font-semibold text-slate-800 mb-3">Fill a Form</h2>
-    <p class="text-sm text-slate-500 mb-4">Select a patient and a questionnaire to fill out.</p>
+    <p class="text-sm text-slate-500 mb-4">Search for a patient using the FHIR API and select a questionnaire to fill out.</p>
     <form method="get" id="fill-form">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Patient</label>
-                <select id="fill-patient" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
-                    <option value="">Select patient...</option>
-                    {% if selected_patient and selected_patient.id not in patients[:50]|map(attribute='id')|list %}
-                    <option value="{{ selected_patient.id }}" selected>{{ selected_patient.display_name }}</option>
-                    {% endif %}
-                    {% for p in patients[:50] %}
-                    <option value="{{ p.id }}" {% if selected_patient and selected_patient.id == p.id %}selected{% endif %}>{{ p.display_name }}</option>
-                    {% endfor %}
-                </select>
+                <div class="relative">
+                    <input type="hidden" id="fill-patient" value="{{ selected_patient.id if selected_patient else '' }}">
+                    <input type="text" id="patient-search" autocomplete="off"
+                        class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
+                        placeholder="Type to search patients..."
+                        value="{{ selected_patient.display_name if selected_patient else '' }}">
+                    <div id="patient-results" class="absolute z-10 w-full bg-white border border-slate-300 rounded-md mt-1 shadow-lg max-h-60 overflow-y-auto hidden"></div>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">FHIR: GET /fhir/Patient?name=...</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Questionnaire</label>
@@ -124,9 +124,72 @@
 function goFillForm() {
     var pid = document.getElementById('fill-patient').value;
     var qid = document.getElementById('fill-questionnaire').value;
-    if (!pid) { alert('Please select a patient'); return; }
+    if (!pid) { alert('Please search and select a patient first'); return; }
     if (!qid) { alert('Please select a questionnaire'); return; }
     window.location.href = '/patient/' + pid + '/form/' + qid;
 }
+
+(function() {
+    var searchInput = document.getElementById('patient-search');
+    var hiddenInput = document.getElementById('fill-patient');
+    var resultsDiv = document.getElementById('patient-results');
+    var debounceTimer = null;
+
+    searchInput.addEventListener('input', function() {
+        var query = searchInput.value.trim();
+        hiddenInput.value = '';
+
+        clearTimeout(debounceTimer);
+        if (query.length < 2) {
+            resultsDiv.classList.add('hidden');
+            return;
+        }
+
+        debounceTimer = setTimeout(function() {
+            fetch('/fhir/Patient?name=' + encodeURIComponent(query) + '&_count=10')
+                .then(function(r) { return r.json(); })
+                .then(function(bundle) {
+                    resultsDiv.innerHTML = '';
+                    var entries = bundle.entry || [];
+                    if (entries.length === 0) {
+                        resultsDiv.innerHTML = '<div class="px-3 py-2 text-sm text-slate-400">No patients found</div>';
+                        resultsDiv.classList.remove('hidden');
+                        return;
+                    }
+                    entries.forEach(function(entry) {
+                        var res = entry.resource;
+                        var pid = res.id;
+                        var name = 'Unknown';
+                        if (res.name && res.name.length > 0) {
+                            var n = res.name[0];
+                            var given = (n.given || []).join(' ');
+                            name = (given + ' ' + (n.family || '')).trim();
+                        }
+                        var gender = res.gender || '';
+                        var dob = res.birthDate || '';
+                        var detail = [gender, dob].filter(Boolean).join(', ');
+
+                        var div = document.createElement('div');
+                        div.className = 'px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer border-b border-slate-100';
+                        div.innerHTML = '<div class="font-medium">' + name + '</div>' +
+                            (detail ? '<div class="text-xs text-slate-400">' + detail + '</div>' : '');
+                        div.addEventListener('click', function() {
+                            hiddenInput.value = pid;
+                            searchInput.value = name;
+                            resultsDiv.classList.add('hidden');
+                        });
+                        resultsDiv.appendChild(div);
+                    });
+                    resultsDiv.classList.remove('hidden');
+                });
+        }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!resultsDiv.contains(e.target) && e.target !== searchInput) {
+            resultsDiv.classList.add('hidden');
+        }
+    });
+})();
 </script>
 {% endblock %}

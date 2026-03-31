@@ -598,12 +598,12 @@ async def render_patient(request: Request, pid: str) -> Response:
 @app.get("/forms", response_class=HTMLResponse)
 async def forms_list(request: Request) -> Response:
     """List all questionnaires and responses."""
-    patients = load_patients()
     all_responses = load_questionnaire_responses()
 
     patient_id = request.query_params.get("patient")
     selected_patient = None
     if patient_id:
+        patients = load_patients()
         selected_patient = next((p for p in patients if p.id == patient_id), None)
         responses = [r for r in all_responses if r.subject and r.subject.reference.endswith(patient_id)]
     else:
@@ -615,7 +615,6 @@ async def forms_list(request: Request) -> Response:
             "request": request,
             "questionnaires": load_questionnaires(),
             "responses": responses,
-            "patients": patients,
             "selected_patient": selected_patient,
         },
     )
