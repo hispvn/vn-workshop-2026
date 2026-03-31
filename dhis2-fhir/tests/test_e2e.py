@@ -45,7 +45,7 @@ def test_home_shows_ips_bundles(page: Page, base_url: str):
 
 def test_sidebar_links(page: Page, base_url: str):
     page.goto(base_url)
-    for name in ("Home", "Patients", "CHR", "Forms", "IPS Bundles"):
+    for name in ("Home", "Patients", "CHR", "Questionnaires", "IPS Bundles"):
         expect(page.get_by_role("link", name=name, exact=True)).to_be_visible()
 
 
@@ -178,7 +178,7 @@ def test_chr_eir_immunization_table(page: Page, base_url: str):
 
 def test_chr_eir_fhir_equivalent(page: Page, base_url: str):
     page.goto(f"{base_url}/chr/patient/CHRPatientPhouthasinh/eir")
-    expect(page.get_by_text("FHIR Equivalent")).to_be_visible()
+    expect(page.get_by_text("FHIR Equivalent").first).to_be_visible()
 
 
 # ---------------------------------------------------------------------------

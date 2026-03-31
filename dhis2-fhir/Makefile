@@ -1,7 +1,7 @@
 DOCKER_IMAGE := dhis2-fhir-ig
 IG_DIR := ig
 
-.PHONY: help docker-build-image docker-sushi docker-build docs docs-serve run seed test lint slides slides-pdf clean clean-all
+.PHONY: help docker-build-image docker-sushi docker-build docs docs-serve run seed test test-headed test-headed-slow lint slides slides-pdf clean clean-all
 
 help:              ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -34,8 +34,14 @@ lint:              ## Run linters and type checkers
 	@uv run mypy --explicit-package-bases src tests
 	@uv run pyright
 
-test:              ## Run Playwright end-to-end tests (add --headed to watch in browser)
+test:              ## Run Playwright end-to-end tests
 	uv run pytest tests/ -v $(ARGS)
+
+test-headed:       ## Run Playwright tests in a visible browser
+	uv run pytest tests/ -v --headed $(ARGS)
+
+test-headed-slow:  ## Run Playwright tests in a visible browser (slow motion)
+	uv run pytest tests/ -v --headed --slowmo 500 $(ARGS)
 
 slides:            ## Run presentation (Slidev)
 	cd presentation && bun install && bun run dev
