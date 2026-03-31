@@ -34,6 +34,9 @@
     {% endif %}
     {% if response.authored %} &mdash; Date: {{ response.authored }}{% endif %}
     &mdash; Status: {{ response.status }}
+    {% if response.org_unit_reference %}
+        &mdash; Org Unit: <a href="/json/Organization/{{ response.org_unit_reference.split('/')|last }}" class="underline"><code>{{ response.org_unit_reference }}</code></a>
+    {% endif %}
     <br>
     <a href="/json/QuestionnaireResponse/{{ response.id }}" class="text-blue-600 text-xs underline">View JSON &rarr;</a>
 </div>
@@ -159,7 +162,7 @@
             {% if patient is defined and patient %}
             <a href="/patient/{{ patient.id }}" class="btn-secondary">Cancel</a>
             {% else %}
-            <a href="/forms" class="btn-secondary">Cancel</a>
+            <a href="/questionnaires" class="btn-secondary">Cancel</a>
             {% endif %}
         </div>
         {% endif %}

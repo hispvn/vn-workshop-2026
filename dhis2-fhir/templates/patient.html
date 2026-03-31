@@ -174,7 +174,7 @@
 <div class="bg-white rounded-lg shadow-sm p-6 mb-5">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-semibold text-gray-700">QuestionnaireResponses ({{ responses|length }})</h2>
-        <a href="/forms?patient={{ patient.id }}" class="btn-primary btn-sm">+ Fill Questionnaire</a>
+        <a href="/questionnaires?patient={{ patient.id }}" class="btn-primary btn-sm">+ Fill Questionnaire</a>
     </div>
     <p class="text-xs text-gray-400 mb-3">FHIR: <code class="bg-gray-100 px-1 rounded">GET /fhir/QuestionnaireResponse?subject=Patient/{{ patient.id }}</code> <a href="/fhir/QuestionnaireResponse?subject=Patient/{{ patient.id }}" target="_blank" class="text-primary-600 hover:text-primary-700 no-underline">View JSON</a></p>
     {% if responses %}

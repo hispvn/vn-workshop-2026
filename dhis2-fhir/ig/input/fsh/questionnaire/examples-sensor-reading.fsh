@@ -14,6 +14,7 @@ Usage: #example
 * questionnaire = "http://dhis2.org/fhir/learning/Questionnaire/QuestionnaireSensorReading"
 * status = #completed
 * authored = "2025-11-10"
+* extension[orgUnit].valueReference = Reference(OrganizationFacilityA)
 
 * item[0].linkId = "sensor_timestamp"
 * item[0].text = "Timestamp"
@@ -63,6 +64,7 @@ Usage: #example
 * questionnaire = "http://dhis2.org/fhir/learning/Questionnaire/QuestionnaireSensorReading"
 * status = #completed
 * authored = "2025-11-12"
+* extension[orgUnit].valueReference = Reference(OrganizationFacilityB)
 
 * item[0].linkId = "sensor_timestamp"
 * item[0].text = "Timestamp"

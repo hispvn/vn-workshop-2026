@@ -14,6 +14,7 @@ Usage: #example
 * questionnaire = "http://dhis2.org/fhir/learning/Questionnaire/QuestionnaireWaterQuality"
 * status = #completed
 * authored = "2025-10-20"
+* extension[orgUnit].valueReference = Reference(OrganizationFacilityA)
 
 * item[0].linkId = "wq_timestamp"
 * item[0].text = "Collection Date/Time"
@@ -71,6 +72,7 @@ Usage: #example
 * questionnaire = "http://dhis2.org/fhir/learning/Questionnaire/QuestionnaireWaterQuality"
 * status = #completed
 * authored = "2025-10-22"
+* extension[orgUnit].valueReference = Reference(OrganizationFacilityA)
 
 * item[0].linkId = "wq_timestamp"
 * item[0].text = "Collection Date/Time"

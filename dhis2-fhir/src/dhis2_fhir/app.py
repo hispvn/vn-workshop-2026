@@ -23,7 +23,9 @@ from .loader import (
     load_bundles,
     load_codesystems,
     load_immunizations,
+    load_locations,
     load_observations,
+    load_organizations,
     load_patients,
     load_questionnaire_responses,
     load_questionnaires,
@@ -595,8 +597,8 @@ async def render_patient(request: Request, pid: str) -> Response:
 # ---------------------------------------------------------------------------
 
 
-@app.get("/forms", response_class=HTMLResponse)
-async def forms_list(request: Request) -> Response:
+@app.get("/questionnaires", response_class=HTMLResponse)
+async def questionnaires_list(request: Request) -> Response:
     """List all questionnaires and responses."""
     all_responses = load_questionnaire_responses()
 
@@ -932,6 +934,38 @@ async def observation_delete(oid: str, patient_id: str = Form("")) -> RedirectRe
     if patient_id:
         return RedirectResponse(url=f"/patient/{patient_id}", status_code=303)
     return RedirectResponse(url="/", status_code=303)
+
+
+# ---------------------------------------------------------------------------
+# Routes — Organizations & Locations
+# ---------------------------------------------------------------------------
+
+
+@app.get("/organizations", response_class=HTMLResponse)
+async def organization_list(request: Request) -> Response:
+    """Browse all Organizations and Locations."""
+    organizations = load_organizations()
+    locations = load_locations()
+    return templates.TemplateResponse(
+        "organization_list.html",
+        {
+            "request": request,
+            "organizations": organizations,
+            "locations": locations,
+        },
+    )
+
+
+@app.get("/organization/{oid}", response_class=HTMLResponse)
+async def organization_detail(request: Request, oid: str) -> Response:
+    """View an Organization resource."""
+    data = load_raw_json("Organization", oid)
+    if not data:
+        return HTMLResponse(f"<h1>Organization '{oid}' not found</h1>", status_code=404)
+    return templates.TemplateResponse(
+        "organization_detail.html",
+        {"request": request, "org": data},
+    )
 
 
 # ---------------------------------------------------------------------------

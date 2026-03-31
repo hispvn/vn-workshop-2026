@@ -93,6 +93,16 @@ def load_bundles() -> list[dict[str, Any]]:
     return [d for d in _load_raw("Bundle") if d.get("resourceType") == "Bundle"]
 
 
+def load_organizations() -> list[dict[str, Any]]:
+    """Load all Organization resources as raw dicts."""
+    return [d for d in _load_raw("Organization") if d.get("resourceType") == "Organization"]
+
+
+def load_locations() -> list[dict[str, Any]]:
+    """Load all Location resources as raw dicts."""
+    return [d for d in _load_raw("Location") if d.get("resourceType") == "Location"]
+
+
 def load_raw_json(resource_type: str, rid: str) -> dict[str, Any] | None:
     """Load a single resource's raw JSON by type and id."""
     from .store import load_user_resource

@@ -224,6 +224,12 @@ IPS = cross-border immunization verification.
 
 <div class="border rounded p-3">
 
+**Organizations** — DHIS2 org unit hierarchy & facility locations
+
+</div>
+
+<div class="border rounded p-3">
+
 **Terminology** — browse ValueSets & CodeSystems, $expand
 
 </div>

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Organizations — DHIS2-FHIR{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-slate-900 mb-1">Organizations ({{ organizations|length }})</h1>
+<p class="text-slate-500 mb-6">FHIR Organization resources represent DHIS2 organisation units — the hierarchy of administrative and reporting units.</p>
+
+<div class="card card-accent-blue p-6 mb-5">
+    <p class="text-xs text-slate-400 mb-3">FHIR: <code class="bg-slate-100 px-1 rounded">GET /fhir/Organization</code></p>
+    {% if organizations %}
+    <table class="w-full text-sm zebra-table">
+        <thead>
+            <tr class="border-b border-slate-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Name</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">ID</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">DHIS2 UID</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Part Of</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for org in organizations %}
+            <tr class="border-b border-slate-100">
+                <td class="py-2.5 px-3 font-medium">{{ org.name or org.id }}</td>
+                <td class="py-2.5 px-3"><code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">{{ org.id }}</code></td>
+                <td class="py-2.5 px-3 text-slate-600 text-xs">
+                    {% for ident in org.get('identifier', []) %}
+                        {% if ident.get('system') == 'http://dhis2.org/fhir/id/org-unit' %}
+                        <code class="bg-slate-100 px-1.5 py-0.5 rounded">{{ ident.value }}</code>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="py-2.5 px-3 text-slate-600 text-xs">
+                    {% if org.get('partOf') %}
+                    {% set parent_id = org.partOf.reference.split('/')|last %}
+                    <a href="/organization/{{ parent_id }}" class="text-primary-600 hover:underline">{{ parent_id | replace('Organization', '') | humanize_camel }}</a>
+                    {% else %}
+                    <span class="text-slate-400">--</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3">
+                    <div class="flex gap-1">
+                        <a href="/organization/{{ org.id }}" class="btn-primary btn-sm">View</a>
+                        <a href="/json/Organization/{{ org.id }}" class="btn-secondary btn-sm">JSON</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-sm text-slate-500">No Organizations found.</p>
+    {% endif %}
+</div>
+
+{% if locations %}
+<div class="card card-accent-amber p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Locations ({{ locations|length }})</h2>
+    <p class="text-sm text-slate-500 mb-3">FHIR Location resources represent physical places — facilities with GPS coordinates.</p>
+    <table class="w-full text-sm zebra-table">
+        <thead>
+            <tr class="border-b border-slate-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Name</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">ID</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Coordinates</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Managing Org</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for loc in locations %}
+            <tr class="border-b border-slate-100">
+                <td class="py-2.5 px-3 font-medium">{{ loc.name or loc.id }}</td>
+                <td class="py-2.5 px-3"><code class="text-xs bg-slate-100 px-1.5 py-0.5 rounded">{{ loc.id }}</code></td>
+                <td class="py-2.5 px-3 text-slate-600 text-xs">
+                    {% if loc.get('position') %}
+                    {{ loc.position.get('latitude', '') }}, {{ loc.position.get('longitude', '') }}
+                    {% else %}
+                    <span class="text-slate-400">--</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3 text-slate-600 text-xs">
+                    {% if loc.get('managingOrganization') %}
+                    {% set morg_id = loc.managingOrganization.reference.split('/')|last %}
+                    <a href="/organization/{{ morg_id }}" class="text-primary-600 hover:underline">{{ morg_id | replace('Organization', '') | humanize_camel }}</a>
+                    {% else %}
+                    <span class="text-slate-400">--</span>
+                    {% endif %}
+                </td>
+                <td class="py-2.5 px-3">
+                    <div class="flex gap-1">
+                        <a href="/json/Location/{{ loc.id }}" class="btn-secondary btn-sm">JSON</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

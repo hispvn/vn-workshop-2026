@@ -344,11 +344,20 @@ class QuestionnaireResponse(BaseModel):
     resourceType: str = "QuestionnaireResponse"
     id: str = ""
     meta: Meta | None = None
+    extension: list[Extension] = Field(default_factory=list)
     questionnaire: str = ""
     status: str = ""
     authored: str = ""
     subject: Reference | None = None
     item: list[QRItem] = Field(default_factory=list)
+
+    @property
+    def org_unit_reference(self) -> str:
+        """Extract the org unit reference from extensions."""
+        for ext in self.extension:
+            if "org-unit" in ext.url and ext.valueReference:
+                return ext.valueReference.reference
+        return ""
 
     def extract_answers(self) -> dict[str, object]:
         """Flatten all answers into a dict keyed by linkId."""

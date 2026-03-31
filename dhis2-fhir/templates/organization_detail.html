@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ org.name or org.id }} — Organization{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="/organizations" class="text-sm text-primary-600 hover:text-primary-700 no-underline">&larr; Back to Organizations</a>
+</div>
+
+<h1 class="text-2xl font-bold text-slate-900 mb-1">{{ org.name or org.id }}</h1>
+<p class="text-slate-500 mb-6">DHIS2 Organisation Unit</p>
+
+<div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-5">
+    <span class="text-xs text-gray-500 font-medium">FHIR Equivalent:</span>
+    <code class="text-xs text-primary-700 ml-2">GET /fhir/Organization/{{ org.id }}</code>
+    <a href="/json/Organization/{{ org.id }}" class="text-xs text-primary-600 hover:text-primary-700 ml-3 no-underline">View as FHIR JSON</a>
+</div>
+
+<!-- Metadata -->
+<div class="card card-accent-blue p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Metadata</h2>
+    <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+        <dt class="text-slate-500 font-medium">ID</dt>
+        <dd><code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">{{ org.id }}</code></dd>
+        <dt class="text-slate-500 font-medium">Name</dt>
+        <dd>{{ org.name or 'N/A' }}</dd>
+        {% if org.get('partOf') %}
+        <dt class="text-slate-500 font-medium">Part Of</dt>
+        <dd>
+            {% set parent_id = org.partOf.reference.split('/')|last %}
+            <a href="/organization/{{ parent_id }}" class="text-primary-600 hover:underline">{{ parent_id }}</a>
+        </dd>
+        {% endif %}
+    </dl>
+</div>
+
+<!-- Identifiers -->
+{% if org.get('identifier') %}
+<div class="card card-accent-amber p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Identifiers</h2>
+    <table class="w-full text-sm zebra-table">
+        <thead>
+            <tr class="border-b border-slate-200">
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">System</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Value</th>
+                <th class="text-left py-2.5 px-3 font-semibold text-slate-600 bg-slate-50">Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ident in org.identifier %}
+            <tr class="border-b border-slate-100">
+                <td class="py-2.5 px-3 text-xs break-all"><code class="bg-slate-100 px-1 rounded">{{ ident.get('system', 'N/A') }}</code></td>
+                <td class="py-2.5 px-3 font-medium">{{ ident.get('value', 'N/A') }}</td>
+                <td class="py-2.5 px-3 text-slate-600 text-xs">
+                    {% if ident.get('type') and ident.type.get('coding') %}
+                    {{ ident.type.coding[0].get('code', '') }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Type -->
+{% if org.get('type') %}
+<div class="card card-accent-purple p-6 mb-5">
+    <h2 class="text-lg font-semibold text-slate-800 mb-3">Type</h2>
+    <div class="flex flex-wrap gap-2">
+        {% for t in org.type %}
+            {% for coding in t.get('coding', []) %}
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700">{{ coding.get('display', coding.get('code', '')) }}</span>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
