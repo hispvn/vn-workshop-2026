@@ -1,0 +1,18 @@
+id: my.fhir.ig
+canonical: http://example.org/fhir/ig
+name: MyFHIRIG
+title: My FHIR Implementation Guide
+description: A minimal starting-point Implementation Guide
+status: draft
+version: 0.1.0
+fhirVersion: 4.0.1
+copyrightYear: 2026+
+releaseLabel: ci-build
+license: CC0-1.0
+publisher:
+  name: Workshop Participant
+  url: http://example.org
+
+menu:
+  Home: index.html
+  Artifacts: artifacts.html
