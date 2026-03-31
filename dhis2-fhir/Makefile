@@ -38,10 +38,10 @@ test:              ## Run Playwright end-to-end tests (add --headed to watch in 
 	uv run pytest tests/ -v $(ARGS)
 
 slides:            ## Run presentation (Slidev)
-	cd presentation && bun run dev
+	cd presentation && bunx @slidev/cli
 
 slides-pdf:        ## Export presentation to PDF
-	cd presentation && bunx slidev export --output slides.pdf
+	cd presentation && bunx @slidev/cli export --output slides.pdf
 
 docs:              ## Build documentation (mkdocs)
 	uv run mkdocs build
