@@ -1,11 +1,14 @@
 DOCKER_IMAGE := fhir-ig
 IG_DIR := ig
 
-.PHONY: help setup sushi build clean clean-all
+.PHONY: help setup generate sushi build clean clean-all
 
 help:              ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 	  awk 'BEGIN {FS = ":.*?## "}; {printf "  %-14s %s\n", $$1, $$2}'
+
+generate:          ## Generate FSH examples from Faker
+	uv run generate.py
 
 setup:             ## Build the Docker image (one-time setup)
 	docker build -t $(DOCKER_IMAGE) .
