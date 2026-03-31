@@ -101,8 +101,8 @@ Coded vocabularies (option sets)
 
 <div class="border rounded p-3 bg-purple-50">
 
-**Organization**
-Facilities, org unit hierarchy
+**Organization / Location**
+Org unit hierarchy, facility GPS coordinates
 
 </div>
 
